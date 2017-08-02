@@ -43,7 +43,7 @@ class UnitTestsUtils::Manifest
       instance_names.each do |instance_name|
         value = instance_name.sub('/', '-')
 
-        hostnames["#{instance_name}"] = "#{name}-#{value}.node.dc1.consul"
+        hostnames["#{instance_name}"] = "#{name}-#{value}.node.#{properties['consul']['dc']}.#{properties['consul']['domain']}"
       end
 
       hostnames
