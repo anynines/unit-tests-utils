@@ -13,19 +13,19 @@ module UnitTestsUtils::Bosh
     wait_for_task_to_finish(deployment_name)
   end
 
-  def self.start_instance(deployment_name, instance_name)
-    `bosh --non-interactive -d #{deployment_name} start #{instance_name} --force`
+  def self.start_instance(deployment_name, instance_name, index="0")
+    `bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force`
     wait_for_task_to_finish(deployment_name)
   end
 
-  def self.stop_instance(deployment_name, instance_name)
-    `bosh --non-interactive -d #{deployment_name} stop #{instance_name} --hard --force`
+  def self.stop_instance(deployment_name, instance_name, index="0")
+    `bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} --hard --force`
     wait_for_task_to_finish(deployment_name)
   end
 
-  def self.ssh(deployment_name, command, instance_name = nil)
+  def self.ssh(deployment_name, command, instance_name="", index="")
     if instance_name
-      `bosh -d #{deployment_name} ssh #{instance_name} -c #{command}`
+      `bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c #{command}`
     else
       `bosh -d #{deployment_name} ssh -c #{command}`
     end
