@@ -14,13 +14,9 @@ class UnitTestsUtils::Manifest
 
   def instance_names
     @instance_names ||= begin
-      instance_names = []
-
       manifest['instance_groups'].map do |instance_group|
-        (0..instance_count(instance_group['name'])-1).each { |i| instance_names << "#{instance_group['name']}/#{i}" }
+        instance_group['name']
       end
-
-      instance_names
     end
   end
 
@@ -30,10 +26,11 @@ class UnitTestsUtils::Manifest
       .first['instances']
   end
 
-  def hostname(instance_name = nil)
-    instance_name ||= self.instance_names.first
+  def hostname(instance_name=nil, index="0")
+    instance_name = instance_names.first if instance_names.nil?
+    key = "#{instance_name}/#{index}"
 
-    hostnames[instance_name]
+    hostnames[key]
   end
 
   def hostnames
@@ -41,9 +38,9 @@ class UnitTestsUtils::Manifest
       hostnames = {}
 
       instance_names.each do |instance_name|
-        value = instance_name.sub('/', '-')
-
-        hostnames["#{instance_name}"] = "#{name}-#{value}.node.#{properties['consul']['dc']}.#{properties['consul']['domain']}"
+        instance_count(instance_name).times do |index|
+          hostnames["#{instance_name}/#{index}"]  = "#{name}-#{instance_name}-#{index}.node.#{properties['consul']['dc']}.#{properties['consul']['domain']}"
+        end
       end
 
       hostnames
