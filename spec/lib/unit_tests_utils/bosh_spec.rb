@@ -1,7 +1,7 @@
 require 'spec_helper'
 require_relative '../../../lib/unit_tests_utils'
 
-describe "UnitTestsUtils::Bosh" do
+describe UnitTestsUtils::Bosh do
   let(:deployment_name) { "database-ha" }
   let(:manifest_path)   { "./database-ha.yml" }
   let(:instance_name)   { "database" }
