@@ -27,7 +27,7 @@ class UnitTestsUtils::Manifest
   end
 
   def hostname(instance_name=nil, index="0")
-    instance_name = instance_names.first if instance_names.nil?
+    instance_name = instance_names.first if instance_name.nil?
     key = "#{instance_name}/#{index}"
 
     hostnames[key]
