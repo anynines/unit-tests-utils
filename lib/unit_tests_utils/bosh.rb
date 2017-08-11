@@ -41,7 +41,6 @@ module UnitTestsUtils::Bosh
     end
   end
 
-
   private
 
   def self.wait_for_task_to_finish(deployment_name)

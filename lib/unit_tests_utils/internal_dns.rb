@@ -1,3 +1,5 @@
+require 'json'
+
 module UnitTestsUtils::InternalDNS
   # <b>DEPRECATED:</b> Please use <tt>resolve_domain_name</tt> instead.
   def self.resolv(hostname)
@@ -14,7 +16,19 @@ module UnitTestsUtils::InternalDNS
   end
 
   def self.nameserver_ip
-    ENV['INTERNAL_DNS_IP']
+    if ENV['INTERNAL_DNS_IP'] then
+      return ENV['INTERNAL_DNS_IP']
+    else
+      instances = JSON.parse(`bosh vms -d consul-dns --json`)["Tables"][0]["Rows"]
+      
+      instances.each_with_index do |val, index| 
+        if instances[index]["instance"].match?("dnsmasq") then 
+          return instances[index]["ips"] 
+        end 
+      end
+    end
+
+    raise 'No internal dns ip found'
   end
 
   def self.valid_hostnames?(hostnames)

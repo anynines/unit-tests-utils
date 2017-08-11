@@ -3,6 +3,8 @@ require_relative '../../../lib/unit_tests_utils'
 
 describe UnitTestsUtils::InternalDNS do
   let(:internal_dns_ip) { "1.2.3.4" }
+  let(:bosh_internal_dns_ips) { ["10.244.5.16", "10.244.6.16"] }
+  let(:json_path) { (File.dirname(__FILE__) + "/../../fixtures/consul_dns_example.json") }
 
   before :each do
     allow(ENV).to receive(:[]).with("INTERNAL_DNS_IP").
@@ -73,8 +75,30 @@ describe UnitTestsUtils::InternalDNS do
   end
 
   describe ".nameserver_ip" do
-    it "returns the env var INTERNAL_DNS_IP" do
-      expect(UnitTestsUtils::InternalDNS.nameserver_ip).to eq internal_dns_ip
+    context "when a INTERNAL_DNS_IP env variable is set" do
+      before(:each) do
+        allow(ENV).to receive(:[]).with("INTERNAL_DNS_IP").
+        and_return(internal_dns_ip)
+      end
+
+      it "returns a valid nameserver ip address" do
+        expect(UnitTestsUtils::InternalDNS.nameserver_ip).to eq internal_dns_ip
+      end
+    end
+
+    context "when no INTERNAL_DNS_IP env variable is set" do
+      before :each do
+        allow(ENV).to receive(:[]).with("INTERNAL_DNS_IP").
+          and_return(nil)
+      end
+
+      it "returns a valid nameserver ip address" do
+        expect(UnitTestsUtils::InternalDNS).to receive(:`).once.
+          with("bosh vms -d consul-dns --json").
+          and_return(File.read(json_path))
+
+        expect(bosh_internal_dns_ips).to include UnitTestsUtils::InternalDNS.nameserver_ip
+      end
     end
   end
 

@@ -1,0 +1,65 @@
+{
+    "Tables": [
+        {
+            "Content": "vms",
+            "Header": {
+                "az": "AZ",
+                "instance": "Instance",
+                "ips": "IPs",
+                "process_state": "Process State",
+                "vm_cid": "VM CID",
+                "vm_type": "VM Type"
+            },
+            "Rows": [
+                {
+                    "az": "z2",
+                    "instance": "consul/41828278-bfe4-45d5-b452-d515b918c2e1",
+                    "ips": "10.244.6.15",
+                    "process_state": "running",
+                    "vm_cid": "35eb9e2a-b218-4d67-618f-cd1becbeab7d",
+                    "vm_type": "small"
+                },
+                {
+                    "az": "z1",
+                    "instance": "consul/550c8b9f-8663-450d-8517-eb44d6bfe95b",
+                    "ips": "10.244.5.15",
+                    "process_state": "running",
+                    "vm_cid": "10db6596-bf07-4b00-59a6-b4dd7cf3d6e2",
+                    "vm_type": "small"
+                },
+                {
+                    "az": "z3",
+                    "instance": "consul/c72af6e7-48bb-4bb4-878a-34a1ca844999",
+                    "ips": "10.244.7.15",
+                    "process_state": "running",
+                    "vm_cid": "c32fdac5-8bfc-40d8-65fc-7a1b78788f0b",
+                    "vm_type": "small"
+                },
+                {
+                    "az": "z1",
+                    "instance": "dnsmasq/7c3073d8-f171-415e-9404-a319f5678636",
+                    "ips": "10.244.5.16",
+                    "process_state": "running",
+                    "vm_cid": "4cf7ea0f-3836-4f20-4c86-9605b4dd356a",
+                    "vm_type": "small"
+                },
+                {
+                    "az": "z2",
+                    "instance": "dnsmasq/a614e91c-c132-4575-8729-d84a7ffc122e",
+                    "ips": "10.244.6.16",
+                    "process_state": "running",
+                    "vm_cid": "a96b688e-d140-45b8-6216-e50a235c7ec5",
+                    "vm_type": "small"
+                }
+            ],
+            "Notes": null
+        }
+    ],
+    "Blocks": null,
+    "Lines": [
+        "Using environment '192.168.50.6' as client 'admin'",
+        "Task 42",
+        ". Done",
+        "Succeeded"
+    ]
+}
