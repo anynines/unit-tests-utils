@@ -11,13 +11,13 @@ describe UnitTestsUtils::Bosh do
     let(:path_to_creds) { './config.yml' }
     let(:path_to_iaas_config) { './iaas_config.yml' }
 
-    before :each do
+    before(:each) do
       expect(ENV).to receive(:[]).with('PATH_TO_IAAS_CONFIG').at_least(:once).
         and_return(path_to_iaas_config)
     end
 
     context "when the PATH_TO_CREDS env var is set" do
-      before :each do
+      before(:each) do
         expect(ENV).to receive(:[]).with('PATH_TO_CREDS').at_least(:once).
           and_return(path_to_creds)
       end
@@ -34,7 +34,7 @@ describe UnitTestsUtils::Bosh do
     end
 
     context "when the PATH_TO_CREDS env var is not set" do
-      before :each do
+      before(:each) do
         expect(ENV).to receive(:[]).with('PATH_TO_CREDS').
           and_return(nil)
       end
@@ -117,7 +117,7 @@ describe UnitTestsUtils::Bosh do
     let(:release_path) { base_dir + release_name }
     let(:releases) { [release_path] }
 
-    before :each do
+    before(:each) do
       expect(Dir).to receive(:[]).once.and_return(releases)
       expect(releases).to receive(:sort_by).once.and_return(releases)
     end

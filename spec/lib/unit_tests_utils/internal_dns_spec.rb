@@ -6,7 +6,7 @@ describe UnitTestsUtils::InternalDNS do
   let(:bosh_internal_dns_ips) { ["10.244.5.16", "10.244.6.16"] }
   let(:json_path) { (File.dirname(__FILE__) + "/../../fixtures/consul_dns_example.json") }
 
-  before :each do
+  before(:each) do
     allow(ENV).to receive(:[]).with("INTERNAL_DNS_IP").
       and_return(internal_dns_ip)
   end
@@ -87,7 +87,7 @@ describe UnitTestsUtils::InternalDNS do
     end
 
     context "when no INTERNAL_DNS_IP env variable is set" do
-      before :each do
+      before(:each) do
         allow(ENV).to receive(:[]).with("INTERNAL_DNS_IP").
           and_return(nil)
       end
@@ -105,13 +105,13 @@ describe UnitTestsUtils::InternalDNS do
   describe ".valid_hostnames?" do
     let(:hostname1) { "hostname1.domain" }
     let(:hostname2) { "hostname2.domain" }
-    before :each do
+    before(:each) do
       allow(UnitTestsUtils::InternalDNS).
         to receive(:resolv).with(hostname1).and_return("1.2.3.4")
     end
 
     context "when the list is invalid" do
-      before :each do
+      before(:each) do
         allow(UnitTestsUtils::InternalDNS).
           to receive(:resolv).with(hostname2).and_return("no")
       end
@@ -123,7 +123,7 @@ describe UnitTestsUtils::InternalDNS do
     end
 
     context "when the list is valid" do
-      before :each do
+      before(:each) do
         allow(UnitTestsUtils::InternalDNS).
           to receive(:resolv).with(hostname2).and_return("2.3.4.5")
       end
