@@ -1,4 +1,4 @@
-require 'json'
+require 'yaml'
 
 module UnitTestsUtils::Consul
   def self.get_value_for_key(key)
@@ -9,13 +9,8 @@ module UnitTestsUtils::Consul
     if ENV['INTERNAL_CONSUL_IP'] then
       return ENV['INTERNAL_CONSUL_IP']
     else
-      instances = JSON.parse(`bosh vms -d consul-dns --json`)["Tables"][0]["Rows"]
-
-      instances.each_with_index do |val, index| 
-        if instances[index]["instance"].match?("consul") then 
-          return instances[index]["ips"] 
-        end 
-      end
+      iaas_config = YAML.load_file(ENV['PATH_TO_IAAS_CONFIG'])
+      return iaas_config['iaas']['consul']['consul_ips'][0]
     end
 
     raise 'No consul ip found'

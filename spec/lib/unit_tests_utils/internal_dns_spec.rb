@@ -4,7 +4,9 @@ require_relative '../../../lib/unit_tests_utils'
 describe UnitTestsUtils::InternalDNS do
   let(:internal_dns_ip) { "1.2.3.4" }
   let(:bosh_internal_dns_ips) { ["10.244.5.16", "10.244.6.16"] }
-  let(:json_path) { (File.dirname(__FILE__) + "/../../fixtures/consul_dns_example.json") }
+  let(:json_path) { File.dirname(__FILE__) + "/../../fixtures/consul_dns_example.json" }
+  let(:path_iaas_config) { File.dirname(__FILE__) + "/../../fixtures/sample_iaas_config.yml" }
+
 
   before(:each) do
     allow(ENV).to receive(:[]).with("INTERNAL_DNS_IP").
@@ -92,11 +94,12 @@ describe UnitTestsUtils::InternalDNS do
           and_return(nil)
       end
 
-      it "returns a valid nameserver ip address" do
-        expect(UnitTestsUtils::InternalDNS).to receive(:`).once.
-          with("bosh vms -d consul-dns --json").
-          and_return(File.read(json_path))
+      before(:each) do
+        allow(ENV).to receive(:[]).with("PATH_TO_IAAS_CONFIG").
+          and_return(path_iaas_config)
+      end
 
+      it "returns a valid nameserver ip address" do
         expect(bosh_internal_dns_ips).to include UnitTestsUtils::InternalDNS.nameserver_ip
       end
     end

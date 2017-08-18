@@ -1,0 +1,200 @@
+iaas:
+  cf:
+    system_domain: bosh-lite.adherry.de
+    app_domains: [bosh-lite.adherry.de]
+    app_domain: bosh-lite.adherry.de
+    consul_ips:
+    - 10.244.5.17
+    consul_instances: 1
+    nats_ips:
+    - 10.244.5.28
+    nats_instances: 1
+    etcd_instances: 1
+    etcd_ips:
+    - 10.244.5.21
+    uaa_instances: 1
+    api_instances: 1
+    doppler_instances: 1
+    trafficcontroller_instances: 1
+    router_instances: 1
+    router_ips:
+    - 10.244.5.20
+  consul:
+    domain: consul
+    consul_ips:
+    - 10.244.5.15
+    - 10.244.6.15
+    - 10.244.7.15
+    dnsmasq_ips:
+    - 10.244.5.16
+    - 10.244.6.16
+    - 10.244.7.16
+    join_ip: 10.244.5.15
+
+  diego:
+    diego-api_instances: 1
+    cell_instances: 3
+    cc_bridge_instances: 1
+    access_instances: 0
+    access_ips:
+    - 10.244.5.99
+
+  mongodb-service:
+    service:
+      version: '3.2.x'
+      guid: f791fd80-3e5d-4913-a4dc-ede3151a5d8f #Generate those GUIDs with a generator or I will strangle a Kitty in front of you, repeatedly
+      name: a9s-mongodb32
+    service_plans:
+      'mongodb-replica-small':
+        description: 'a replica set'
+        free: true
+        guid: a2795518-8111-4681-91c5-46f202cea289
+        template_name: 'mongodb-replica-small'
+      'mongodb-replica-big':
+        description: 'a replica set'
+        free: true
+        guid: 1d92e080-5471-4c6e-9ce2-a557a91b0358
+        template_name: 'mongodb-replica-big'
+      'mongodb-single-small':
+        description: 'mongodb single'
+        free: true
+        guid: fdd3503c-8c32-41ba-884d-0ef1a4cdac95
+        template_name: 'mongodb-single-small'
+      'mongodb-single-big':
+        description: 'mongodb single'
+        free: true
+        guid: f0c66259-683b-42bc-81b0-ebbcb029df20
+        template_name: 'mongodb-single-big'
+
+  rabbitmq-service:
+    broker:
+      api_endpoint: http://rabbitmq-service-broker.service.dc1.consul:3000
+      consul_domain: rabbitmq-service-broker.service.dc1.consul
+    service:
+      version: '3.5.4'
+      guid: 1a177563-19b8-4662-bb98-b214d03f79d5 #Generate those GUIDs with a generator or I will strangle a Kitty in front of you, repeatedly
+      name: a9s-rabbitmq36
+    service_plans:
+      'rabbitmq-cluster-small':
+        description: 'a clustered instance'
+        free: true
+        guid: ee308fa2-118d-44a7-88cf-7f9f8df760f9
+        template_name: 'rabbitmq-replica-small'
+      'rabbitmq-single-small':
+        description: 'a single instance'
+        free: true
+        guid: a2d4901b-626d-4531-ab91-342a8ff5c5a3
+        template_name: 'rabbitmq-single-small'
+      'rabbitmq-cluster-big':
+        description: 'a big clustered instance'
+        free: true
+        guid: 23a225fc-d7f3-4df2-946e-95008a1a7498
+        template_name: 'rabbitmq-replica-big'
+      'rabbitmq-single-big':
+        description: 'a big single instance'
+        free: true
+        guid: 855eef16-8e67-4c9b-af59-5120f58787c2
+        template_name: 'rabbitmq-single-big'
+
+  redis_service:
+    service:
+      version: '3.0.0'
+      guid: ce7d9d95-6877-4151-9e58-249745aebd77 #Generate those GUIDs with a generator or I will strangle a Kitty in front of you, repeatedly
+      name: a9s-redis32
+    service_plans:
+      'redis-single-small':
+        description: 'a single instance'
+        free: true
+        guid: '3409f428-6ff3-4dc9-9bf1-545f19d909e9'
+        template_name: 'redis-single-small'
+      'redis-single-big':
+        description: 'a big single instance'
+        free: true
+        guid: '35bcf956b-7494-4842-ac89-8865949ca367'
+        template_name: 'redis-single-small'
+
+  pg_service:
+    service:
+      version: '9.4.5'
+      guid: 7ee52a02-8839-43c2-a550-728ad736bbda #Generate those GUIDs with a generator or I will strangle a Kitty in front of you, repeatedly
+      name: a9s-postgresql94
+    service_plans:
+      'postgresql-replica-small':
+        description: 'a small replica set'
+        free: true
+        guid: b9e7e980-f457-4360-9352-a257f53559ca
+        template_name: 'postgresql-replica-small'
+      'postgresql-single-small':
+        description: 'a small single instance'
+        free: true
+        guid: eb79b44b-90ec-4bd1-9cb5-3d1e52f1a6ab
+        template_name: 'postgresql-single-small'
+      'postgresql-replica-big':
+        description: 'a big replica set'
+        free: true
+        guid: 000bc18f-f2ae-479a-88b7-0fd46333d4a3
+        template_name: 'postgresql-replica-big'
+      'postgresql-single-big':
+        description: 'a big single instance'
+        free: true
+        guid: 6b1973db-e057-4a71-9832-a4b3f27a0d8f
+        template_name: 'postgresql-single-big'
+
+  elasticsearch_service:
+    service:
+      version: '3.0.0'
+      guid: da0445f1-2587-4a8d-a5e0-352681f7d9fa #Generate those GUIDs with a generator or I will strangle a Kitty in front of you, repeatedly
+      name: a9s-elasticsearch5
+    service_plans:
+      'elasticsearch-single-small':
+        guid: 'e661b6ae-6fbe-4f88-818d-385a00a072c8'
+        description: 'a single instance'
+        free: true
+        template_name: 'elasticsearch-single-small'
+      'elasticsearch-cluster-small':
+        guid: 'acade6c7-0dd4-4136-879d-1c6bee78a455'
+        description: 'a cluster instance'
+        free: true
+        template_name: 'elasticsearch-cluster-small'
+      'elasticsearch-single-big':
+        guid: '5374cc4a-ffd0-449e-8615-d87069d1198b'
+        description: 'a single instance'
+        free: true
+        template_name: 'elasticsearch-single-big'
+      'elasticsearch-cluster-big':
+        guid: 'aa5024d1-3477-46c3-b3c2-56aa8a4c0d2a'
+        description: 'a cluster instance'
+        free: true
+        template_name: 'elasticsearch-cluster-big'
+
+  logme_service:
+    service:
+      version: '1.0.0'
+      guid: 3b753f76-3217-4970-93c2-023a36ebbab9
+      name: a9s-logme
+      dashboard_client:
+        id: fdb28c58-354f-410f-8cee-34fc96943d38
+    service_plans:
+      'logme-single-small':
+        guid: '97a694c1-e8c5-4c62-9744-6afe883654da'
+        description: 'a small dedicated LogMe service for demonstration reasons'
+        free: true
+        template_name: 'logme-single-small'
+      'logme-single-big':
+        guid: 'a7773880-1d02-4a0f-b7e3-ad85bdfd99c4'
+        description: 'a big dedicated LogMe service for demonstration reasons'
+        free: true
+        template_name: 'logme-single-big'
+      'logme-cluster-small':
+        guid: '2e070d39-06c9-4705-a964-3d7bd3e447a5'
+        description: 'a small clustered LogMe service for production'
+        free: true
+        template_name: 'logme-cluster-small'
+      'logme-cluster-big':
+        guid: '33813b7a-e278-425e-ba53-04a0b54dbbdb'
+        description: 'a big clustered LogMe service for production'
+        free: true
+        template_name: 'logme-cluster-big'
+
+  service_guard:
+    skip_ssl_validation: true

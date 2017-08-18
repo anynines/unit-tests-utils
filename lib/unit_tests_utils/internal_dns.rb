@@ -1,4 +1,4 @@
-require 'json'
+require 'yaml'
 
 module UnitTestsUtils::InternalDNS
   # <b>DEPRECATED:</b> Please use <tt>resolve_domain_name</tt> instead.
@@ -17,18 +17,11 @@ module UnitTestsUtils::InternalDNS
 
   def self.nameserver_ip
     if ENV['INTERNAL_DNS_IP'] then
-      return ENV['INTERNAL_DNS_IP']
+      ENV['INTERNAL_DNS_IP']
     else
-      instances = JSON.parse(`bosh vms -d consul-dns --json`)["Tables"][0]["Rows"]
-      
-      instances.each_with_index do |val, index| 
-        if instances[index]["instance"].match?("dnsmasq") then 
-          return instances[index]["ips"] 
-        end 
-      end
+      iaas_config = YAML.load_file(ENV['PATH_TO_IAAS_CONFIG'])
+      return iaas_config['iaas']['consul']['dnsmasq_ips'][0]
     end
-
-    raise 'No internal dns ip found'
   end
 
   def self.valid_hostnames?(hostnames)
