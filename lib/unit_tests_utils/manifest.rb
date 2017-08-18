@@ -1,23 +1,43 @@
 require 'yaml'
 
 class UnitTestsUtils::Manifest
-  attr_reader :path, :manifest
+  @@instances = {}
 
-  def initialize(manifest_path)
+  attr_reader :path, :manifest, :additional_vars
+
+  def self.create(name, manifest_path, additional_vars = {})
+    raise ArgumentError, "Manifest for name #{name} already exists" if @@instances.has_key?(name)
+
+    @@instances[name] = self.new(manifest_path, additional_vars)
+  end
+
+  def self.fetch(name)
+    raise ArgumentError, "Manifest for name #{name} does not exist" unless @@instances.has_key?(name)
+
+    @@instances[name]
+  end
+
+  def initialize(manifest_path, additional_vars = {})
     @path = manifest_path
     @manifest = YAML.load_file(manifest_path)
+    @additional_vars = additional_vars
   end
 
   def name
-    @name ||= manifest['name']
+    @name ||= begin
+      additional_vars_key = manifest['name'][/^\(\((.*)\)\)$/, 1]
+      additional_vars_key = additional_vars_key.to_sym if additional_vars_key
+
+      if additional_vars_key && additional_vars.has_key?(additional_vars_key)
+        additional_vars[additional_vars_key]
+      else
+        manifest['name']
+      end
+    end
   end
 
   def instance_names
-    @instance_names ||= begin
-      manifest['instance_groups'].map do |instance_group|
-        instance_group['name']
-      end
-    end
+    @instance_names ||= manifest['instance_groups'].map { |instance_group| instance_group['name'] }
   end
 
   def instance_count(instance_name)
@@ -26,8 +46,8 @@ class UnitTestsUtils::Manifest
       .first['instances']
   end
 
-  def hostname(instance_name=nil, index="0")
-    instance_name = instance_names.first if instance_name.nil?
+  def hostname(instance_name = nil, index = '0')
+    instance_name = instance_names.first unless instance_name
     key = "#{instance_name}/#{index}"
 
     hostnames[key]
@@ -39,7 +59,7 @@ class UnitTestsUtils::Manifest
 
       instance_names.each do |instance_name|
         instance_count(instance_name).times do |index|
-          hostnames["#{instance_name}/#{index}"]  = "#{name}-#{instance_name}-#{index}.node.#{properties['consul']['dc']}.#{properties['consul']['domain']}"
+          hostnames["#{instance_name}/#{index}"] = "#{name}-#{instance_name}-#{index}.node.#{properties['consul']['dc']}.#{properties['consul']['domain']}"
         end
       end
 

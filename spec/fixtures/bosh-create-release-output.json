@@ -1,0 +1,57 @@
+{
+  "Tables": [
+    {
+      "Content": "",
+      "Header": {
+        "commit_hash": "Commit Hash",
+        "name": "Name",
+        "version": "Version"
+      },
+      "Rows": [
+        {
+          "commit_hash": "4a207a6+",
+          "name": "service-ha",
+          "version": "0+dev.1"
+        }
+      ],
+      "Notes": null
+    },
+    {
+      "Content": "jobs",
+      "Header": {
+        "digest": "Digest",
+        "job": "Job",
+        "packages": "Packages"
+      },
+      "Rows": [
+        {
+          "digest": "7f8018c1d6df74ded530811c92c50f78b4571186",
+          "job": "service/46458357b343dc6c68ef395e077738eff5ab7c2c",
+          "packages": "service-ha"
+        }
+      ],
+      "Notes": null
+    },
+    {
+      "Content": "packages",
+      "Header": {
+        "dependencies": "Dependencies",
+        "digest": "Digest",
+        "package": "Package"
+      },
+      "Rows": [
+        {
+          "dependencies": "",
+          "digest": "4f025ed792382f0e4d7d3d2043d1e9241ab3a2d1",
+          "package": "service-ha/818c9e4102196951d58490fdb917a6d6fd9de5a5"
+        }
+      ],
+      "Notes": null
+    }
+  ],
+  "Blocks": null,
+  "Lines": [
+    "Added dev release 'service-ha/0+dev.1'",
+    "Succeeded"
+  ]
+}

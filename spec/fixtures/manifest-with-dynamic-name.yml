@@ -1,0 +1,13 @@
+---
+name: ((unit_test_name))
+
+instance_groups:
+- name: database
+  instances: 3
+- name: backup
+  instances: 1
+
+properties:
+  consul:
+    dc: datacenter
+    domain: foo

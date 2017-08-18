@@ -10,7 +10,7 @@ module UnitTestsUtils::InternalDNS
   end
 
   def self.host_addresses(hostnames, port)
-    hostnames.map { |hostname| "#{resolv(hostname)}:#{port}" }
+    hostnames.map { |hostname| resolve_domain_name(hostname).map { |ip_address| "#{ip_address}:#{port}" } }.flatten
   end
 
   def self.nameserver_ip
@@ -18,10 +18,18 @@ module UnitTestsUtils::InternalDNS
   end
 
   def self.valid_hostnames?(hostnames)
-    hostnames.all? { |hostname| valid_ips?([resolv(hostname)]) }
+    hostnames.all? do |hostname|
+      ips = resolve_domain_name(hostname)
+
+      if ips.empty?
+        false
+      else
+        valid_ips?(ips)
+      end
+    end
   end
 
   def self.valid_ips?(ip_addresses)
-    ip_addresses.all? { |ip| ip =~ /^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$/ }
+    ip_addresses.all? { |ip| ip =~ /^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/ }
   end
 end
