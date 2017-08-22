@@ -26,8 +26,10 @@ module UnitTestsUtils::Bosh
   end
 
   def self.create_and_upload_dev_release(base_dir, release_name)
-    raw_json = `bosh --json create-release --dir #{base_dir} --name #{release_name} --force`
+    unix_timestamp = Time.now.to_i
+    raw_json = `bosh --json create-release --dir #{base_dir} --name #{release_name} --version #{unix_timestamp} --force`
     metadata = parse_json_from_create_release(raw_json)
+
     release_name = "#{metadata[:unit_test_release_name]}-#{metadata[:unit_test_release_version]}.yml"
     release_path = File.join(base_dir, 'dev_releases', metadata[:unit_test_release_name], release_name)
     `bosh upload-release --dir #{base_dir} #{release_path}`
