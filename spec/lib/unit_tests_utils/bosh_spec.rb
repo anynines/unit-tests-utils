@@ -213,4 +213,29 @@ describe UnitTestsUtils::Bosh do
       end
     end
   end
+
+  describe ".instance_status" do
+    context "when the index is not given" do
+      it "runs a bosh instance" do
+        expect(UnitTestsUtils::Bosh).to receive(:`).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+          and_return(Fixtures.file_content('bosh-instances-ps-output.json'))
+
+        result = UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name)
+        expect(result.length).to eq(3)
+      end
+    end
+
+    context "when the index is given" do
+      it "runs a bosh instance" do
+        expect(UnitTestsUtils::Bosh).to receive(:`).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+          and_return(Fixtures.file_content('bosh-instances-ps-output.json'))
+
+        result = UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name, "0")
+        expect(result.length).to eq(1)
+        expect(result.first["index"]).to eq("0")
+      end
+    end
+  end
 end
