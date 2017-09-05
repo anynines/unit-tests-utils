@@ -237,5 +237,17 @@ describe UnitTestsUtils::Bosh do
         expect(result.first["index"]).to eq("0")
       end
     end
+
+    context "when bosh is unavailable" do
+      it "somethign" do
+        expect(UnitTestsUtils::Bosh).to receive(:`).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+          and_return(Fixtures.file_content('bosh-instances-ps-error.json'))
+
+        expect do
+          UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name, "0")
+        end.to raise_error(Exception, "Request timeout.")
+      end
+    end
   end
 end

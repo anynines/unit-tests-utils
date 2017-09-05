@@ -37,6 +37,9 @@ module UnitTestsUtils::Bosh
 
   def self.instance_status(deployment_name, instance_name, index = nil)
     json = JSON.parse(`bosh --non-interactive -d #{deployment_name} instances --details --json`)
+
+    raise Exception.new("Request timeout.") if json['Tables'].nil?
+
     rows = json['Tables'].first.select { |table| table == 'Rows' }
     rows['Rows'].select do |vm|
       !vm['agent_id'].empty? and
