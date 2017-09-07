@@ -219,7 +219,7 @@ describe UnitTestsUtils::Bosh do
       it "runs a bosh instance" do
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
           with("bosh --non-interactive -d #{deployment_name} instances --details --json").
-          and_return(Fixtures.file_content('bosh-instances-ps-output.json'))
+          and_return(Fixtures.file_content('bosh-instances-details-output.json'))
 
         result = UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name)
         expect(result.length).to eq(3)
@@ -230,7 +230,7 @@ describe UnitTestsUtils::Bosh do
       it "runs a bosh instance" do
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
           with("bosh --non-interactive -d #{deployment_name} instances --details --json").
-          and_return(Fixtures.file_content('bosh-instances-ps-output.json'))
+          and_return(Fixtures.file_content('bosh-instances-details-output.json'))
 
         result = UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name, "0")
         expect(result.length).to eq(1)

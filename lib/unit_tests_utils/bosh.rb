@@ -42,7 +42,6 @@ module UnitTestsUtils::Bosh
 
     rows = json['Tables'].first.select { |table| table == 'Rows' }
     rows['Rows'].select do |vm|
-      !vm['agent_id'].empty? and
       vm['instance'].split('/')[0] == instance_name and
       (index.nil? or vm['index'] == index)
     end
