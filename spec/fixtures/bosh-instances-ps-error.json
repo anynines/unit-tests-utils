@@ -1,0 +1,8 @@
+{
+    "Tables": null,
+    "Blocks": null,
+    "Lines": [
+        "Fetching info:\n  Performing request GET 'https://192.168.50.4:25555/info':\n    Performing GET request:\n      Retry: Get https://192.168.50.4:25555/info: dial tcp 192.168.50.4:25555: i/o timeout",
+        "Exit code 1"
+    ]
+}

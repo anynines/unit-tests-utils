@@ -35,6 +35,18 @@ module UnitTestsUtils::Bosh
     metadata
   end
 
+  def self.instance_status(deployment_name, instance_name, index = nil)
+    json = JSON.parse(`bosh --non-interactive -d #{deployment_name} instances --details --json`)
+
+    raise Exception.new("Could not find 'Tables'. Maybe this is a request timeout.") if json['Tables'].nil?
+
+    rows = json['Tables'].first.select { |table| table == 'Rows' }
+    rows['Rows'].select do |vm|
+      vm['instance'].split('/')[0] == instance_name and
+      (index.nil? or vm['index'] == index)
+    end
+  end
+
   def self.delete_release(release_name, release_version = nil)
     release_name << "/#{release_version}" unless release_version.nil?
 

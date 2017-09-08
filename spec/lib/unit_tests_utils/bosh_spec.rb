@@ -213,4 +213,53 @@ describe UnitTestsUtils::Bosh do
       end
     end
   end
+
+  describe ".instance_status" do
+    context "when the index is not given" do
+      it "runs a bosh instance" do
+        expect(UnitTestsUtils::Bosh).to receive(:`).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+          and_return(Fixtures.file_content('bosh-instances-details-output.json'))
+
+        result = UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name)
+        expect(result.length).to eq(3)
+      end
+    end
+
+    context "when the index is given" do
+      it "runs a bosh instance" do
+        expect(UnitTestsUtils::Bosh).to receive(:`).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+          and_return(Fixtures.file_content('bosh-instances-details-output.json'))
+
+        result = UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name, "0")
+        expect(result.length).to eq(1)
+        expect(result.first["index"]).to eq("0")
+      end
+    end
+
+    context "when bosh is unavailable" do
+      it "raises an exception" do
+        expect(UnitTestsUtils::Bosh).to receive(:`).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+          and_return(Fixtures.file_content('bosh-instances-ps-error.json'))
+
+        expect do
+          UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name)
+        end.to raise_error(Exception, "Could not find 'Tables'. Maybe this is a request timeout.")
+      end
+    end
+
+    context "when bosh gives an invalid json as response" do
+      it "raises a json exception" do
+        expect(UnitTestsUtils::Bosh).to receive(:`).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+          and_return(Fixtures.file_content('bosh-invalid-json-output.json'))
+
+        expect do
+          UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name)
+        end.to raise_error(JSON::ParserError)
+      end
+    end
+  end
 end
