@@ -5,8 +5,8 @@ class UnitTestsUtils::Manifest
 
   attr_reader :path, :manifest, :additional_vars
 
-  def self.create(name, manifest_path, additional_vars = {})
-    raise ArgumentError, "Manifest for name #{name} already exists" if @@instances.has_key?(name)
+  def self.create(name, manifest_path, additional_vars = {}, ignore_existing = false)
+    raise ArgumentError, "Manifest for name #{name} already exists" if !ignore_existing && @@instances.has_key?(name)
 
     @@instances[name] = self.new(manifest_path, additional_vars)
   end
