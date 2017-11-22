@@ -17,10 +17,22 @@ class UnitTestsUtils::Manifest
     @@instances[name]
   end
 
+  def self.create_from_env(manifest_prefix, additional_vars = {})
+    manifest_prefix_length= manifest_prefix.length
+
+    ENV.each_key do |name|
+      if name.start_with?(manifest_prefix)
+        manifest_name = name[manifest_prefix_length..-1].to_sym
+
+        self.create(manifest_name, ENV[name], additional_vars)
+      end
+    end
+  end
+
   def initialize(manifest_path, additional_vars = {})
     @path = manifest_path
     @manifest = YAML.load_file(manifest_path)
-    @additional_vars = additional_vars
+    @additional_vars = Hash[additional_vars.map { |key, value| [key.to_sym, value] }]
   end
 
   def name
