@@ -58,6 +58,16 @@ describe UnitTestsUtils::Manifest do
     end
   end
 
+  describe ".create_from_env" do
+    context "when environment variables with such prefixes exists" do
+      it "creates new instances for those names"
+    end
+
+    context "when no environment variables with such prefixes exists" do
+      it "creates does nothing"
+    end
+  end
+
   describe ".new" do
     context "when just a manifest_path is given" do
       it "creates an object and sets the @path, loads the @manifest and sets empty @additional_vars" do
@@ -70,12 +80,26 @@ describe UnitTestsUtils::Manifest do
     end
 
     context "when a manifest_path and additional vars are given" do
-      it "creates an object and sets the @path, loads the @manifest and sets the @additional_vars" do
-        manifest_with_additional_vars = UnitTestsUtils::Manifest.new(manifest_path, manifest_additional_vars)
+      context "when additional vars contains symbols as keys" do
+        it "creates an object and sets the @path, loads the @manifest and sets the @additional_vars" do
+          manifest_with_additional_vars = UnitTestsUtils::Manifest.new(manifest_path, manifest_additional_vars)
 
-        expect(manifest_with_additional_vars.path).to eq manifest_path
-        expect(manifest_with_additional_vars.manifest).to eq manifest_yaml
-        expect(manifest_with_additional_vars.additional_vars).to eq manifest_additional_vars
+          expect(manifest_with_additional_vars.path).to eq manifest_path
+          expect(manifest_with_additional_vars.manifest).to eq manifest_yaml
+          expect(manifest_with_additional_vars.additional_vars).to eq manifest_additional_vars
+        end
+      end
+
+      context "when additional vars contains strings as keys" do
+        let(:manifest_additional_vars_strings) { { 'unit_test_name' => 'service-ha', 'key1' => 'value1', 'key2' => 'value2' } }
+
+        it "creates an object and sets the @path, loads the @manifest, converts the string keys from the additional vars to symbol keys and sets the @additional_vars" do
+          manifest_with_additional_vars = UnitTestsUtils::Manifest.new(manifest_path, manifest_additional_vars_strings)
+
+          expect(manifest_with_additional_vars.path).to eq manifest_path
+          expect(manifest_with_additional_vars.manifest).to eq manifest_yaml
+          expect(manifest_with_additional_vars.additional_vars).to eq manifest_additional_vars
+        end
       end
     end
   end
