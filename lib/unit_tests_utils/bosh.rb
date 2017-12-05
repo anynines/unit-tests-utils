@@ -25,9 +25,9 @@ module UnitTestsUtils::Bosh
     wait_for_task_to_finish(deployment_name)
   end
 
-  def self.create_and_upload_dev_release(base_dir, release_name)
-    unix_timestamp = Time.now.to_i
-    raw_json = `bosh --json create-release --dir #{base_dir} --name #{release_name} --version #{unix_timestamp} --force`
+  def self.create_and_upload_dev_release(base_dir, release_name, version_prefix = '')
+    version = dev_release_version(version_prefix)
+    raw_json = `bosh --json create-release --dir #{base_dir} --name #{release_name} --version #{version} --force`
     metadata = parse_json_from_create_release(raw_json)
 
     release_name = "#{metadata[:unit_test_release_name]}-#{metadata[:unit_test_release_version]}.yml"
@@ -70,12 +70,21 @@ module UnitTestsUtils::Bosh
     `bosh -d #{deployment_name} task > /dev/null 2>&1`
   end
 
+  def self.dev_release_version(version_prefix)
+    version = "dev."
+    version << "#{version_prefix}." unless version_prefix.empty?
+    version << Time.now.to_i.to_s
+
+    version
+  end
+
   def self.parse_json_from_create_release(raw_json)
     json = JSON.parse(raw_json)
     metadata = json['Tables'].select { |table| table['Content'].empty? }.first['Rows'].first
+    normalized_version = metadata['version'].gsub('.', '-')
 
     {
-      unit_test_name: metadata['name'],
+      unit_test_name: "#{metadata['name']}-#{normalized_version}",
       unit_test_release_name: metadata['name'],
       unit_test_release_version: metadata['version'],
       unit_test_release_commit_hash: metadata['commit_hash']
