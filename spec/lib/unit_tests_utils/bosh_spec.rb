@@ -188,7 +188,7 @@ describe UnitTestsUtils::Bosh do
 
         it "runs bosh ssh" do
           expect(UnitTestsUtils::Bosh).to receive(:`).once.
-            with("bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c #{command}")
+            with("bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c '#{command}'")
 
           UnitTestsUtils::Bosh.ssh(deployment_name, command, instance_name, index)
         end
@@ -197,7 +197,7 @@ describe UnitTestsUtils::Bosh do
       context "when the index is not given" do
         it "runs bosh ssh" do
           expect(UnitTestsUtils::Bosh).to receive(:`).once.
-            with("bosh -d #{deployment_name} ssh #{instance_name}/0 -c #{command}")
+            with("bosh -d #{deployment_name} ssh #{instance_name}/0 -c '#{command}'")
 
           UnitTestsUtils::Bosh.ssh(deployment_name, command, instance_name)
         end
@@ -207,7 +207,7 @@ describe UnitTestsUtils::Bosh do
     context "when no instance is given" do
       it "runs bosh ssh" do
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
-          with("bosh -d #{deployment_name} ssh -c #{command}")
+          with("bosh -d #{deployment_name} ssh -c '#{command}'")
 
         UnitTestsUtils::Bosh.ssh(deployment_name, command)
       end
