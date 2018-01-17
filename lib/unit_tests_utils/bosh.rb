@@ -80,6 +80,9 @@ module UnitTestsUtils::Bosh
 
   def self.parse_json_from_create_release(raw_json)
     json = JSON.parse(raw_json)
+
+    raise Exception.new("Could not find 'Tables'. Maybe this is a request timeout.") if json['Tables'].nil?
+
     metadata = json['Tables'].select { |table| table['Content'].empty? }.first['Rows'].first
     normalized_version = metadata['version'].gsub('.', '-')
 
