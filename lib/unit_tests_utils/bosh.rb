@@ -79,6 +79,7 @@ module UnitTestsUtils::Bosh
   end
 
   def self.parse_json_from_create_release(raw_json)
+    puts "--> raw_json:*#{raw_json}*"
     json = JSON.parse(raw_json)
 
     raise Exception.new("Could not find 'Tables'. Maybe this is a request timeout.") if json['Tables'].nil?
