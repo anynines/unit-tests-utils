@@ -7,38 +7,75 @@ module UnitTestsUtils::Bosh
     additional_vars.each { |key, value| vars << " --var #{key}=#{value}" }
 
     `bosh --non-interactive -d #{deployment_name} deploy #{vars} #{manifest_path}`
+    exit_status=$?
+
+    if !exit_status.nil? && exit_status.to_i > 0
+      raise BoshError.new("Deploy failed  - exit_status: #{exit_status}")
+    end
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.delete_deployment(deployment_name)
     `bosh --non-interactive -d #{deployment_name} delete-deployment --force`
+    exit_status=$?
+
+    if !exit_status.nil? && exit_status.to_i > 0
+      raise BoshError.new("Delete deployment failed  - exit_status: #{exit_status}")
+    end
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.start_instance(deployment_name, instance_name, index = '0')
     `bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force`
+    exit_status=$?
+
+    if !exit_status.nil? && exit_status.to_i > 0
+      raise BoshError.new("Starting instance failed  - exit_status: #{exit_status}")
+    end
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.stop_instance(deployment_name, instance_name, index = '0')
     `bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} --hard --force`
+    exit_status=$?
+
+    if !exit_status.nil? && exit_status.to_i > 0
+      raise BoshError.new("Stopping instance failed  - exit_status: #{exit_status}")
+    end
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.create_and_upload_dev_release(base_dir, release_name, version_prefix = '')
     version = dev_release_version(version_prefix)
     raw_json = `bosh --json create-release --dir #{base_dir} --name #{release_name} --version #{version} --force`
+    exit_status=$?
+
+    if !exit_status.nil? && exit_status.to_i > 0
+      raise BoshError.new("Creating release failed  - exit_status: #{exit_status}")
+    end
+
     metadata = parse_json_from_create_release(raw_json)
 
     release_name = "#{metadata[:unit_test_release_name]}-#{metadata[:unit_test_release_version]}.yml"
     release_path = File.join(base_dir, 'dev_releases', metadata[:unit_test_release_name], release_name)
     `bosh upload-release --dir #{base_dir} #{release_path}`
+    exit_status=$?
 
+    if !exit_status.nil? && exit_status.to_i > 0
+      raise BoshError.new("Release upload failed  - exit_status: #{exit_status}")
+    end
     metadata
   end
 
   def self.instance_status(deployment_name, instance_name, index = nil)
-    json = JSON.parse(`bosh --non-interactive -d #{deployment_name} instances --details --json`)
+    output = `bosh --non-interactive -d #{deployment_name} instances --details --json`
+    exit_status=$?
+
+    if !exit_status.nil? && exit_status.to_i > 0
+      raise BoshError.new("Instance status failed  - exit_status: #{exit_status}")
+    end
+
+    json = JSON.parse(output)
 
     raise Exception.new("Could not find 'Tables'. Maybe this is a request timeout.") if json['Tables'].nil?
 
@@ -93,4 +130,6 @@ module UnitTestsUtils::Bosh
       unit_test_release_commit_hash: metadata['commit_hash']
     }
   end
+
+  class BoshError < StandardError; end
 end

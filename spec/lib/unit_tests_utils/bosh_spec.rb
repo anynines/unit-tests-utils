@@ -147,11 +147,21 @@ describe UnitTestsUtils::Bosh do
   describe ".create_and_upload_dev_release" do
     let(:base_dir) { './' }
     let(:release_path) { File.join(base_dir, 'dev_releases', release_name, "#{release_name}-#{release_version}.yml") }
-    let(:metadata) { { unit_test_name: release_name, unit_test_release_name: release_name, unit_test_release_version: release_version, unit_test_release_commit_hash: '4a207a6+' } }
+    let(:metadata) do
+      {
+        unit_test_name: "#{release_name}-#{release_version.gsub('.', '-')}",
+        unit_test_release_name: release_name,
+        unit_test_release_version: release_version,
+        unit_test_release_commit_hash: '4a207a6+'
+      }
+    end
 
     it "runs a bosh create-release and upload-release" do
+      allow(UnitTestsUtils::Bosh).to receive(:dev_release_version).and_return(release_version)
+
       expect(UnitTestsUtils::Bosh).to receive(:`).once.
-        with("bosh --json create-release --dir #{base_dir} --name #{release_name} --force").
+        with("bosh --json create-release --dir #{base_dir} --name #{release_name} --version " \
+             "#{release_version} --force").
         and_return(bosh_release_output(release_name, release_version))
       expect(UnitTestsUtils::Bosh).to receive(:`).once.
         with("bosh upload-release --dir #{base_dir} #{release_path}")
