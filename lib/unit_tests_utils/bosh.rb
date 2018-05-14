@@ -25,8 +25,12 @@ module UnitTestsUtils::Bosh
     wait_for_task_to_finish(deployment_name)
   end
 
-  def self.start_instance(deployment_name, instance_name, index = '0')
-    `bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force`
+  def self.start_instance(deployment_name, instance_name, index = '0', debug = true)
+    if debug
+      `bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force`
+    else
+      `bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force > /dev/null 2> /dev/null`
+    end
     exit_status=$?
 
     if !exit_status.nil? && exit_status.to_i > 0
@@ -35,8 +39,8 @@ module UnitTestsUtils::Bosh
     wait_for_task_to_finish(deployment_name)
   end
 
-  def self.stop_instance(deployment_name, instance_name, index = '0')
-    `bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} --hard --force`
+  def self.stop_instance(deployment_name, instance_name, index = '0', params = "--hard --force")
+    `bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} #{params}`
     exit_status=$?
 
     if !exit_status.nil? && exit_status.to_i > 0
