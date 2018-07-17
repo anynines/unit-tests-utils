@@ -98,9 +98,9 @@ module UnitTestsUtils::Bosh
 
   def self.ssh(deployment_name, command, instance_name = nil, index = '0')
     if instance_name
-      `bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c #{command}`
+      `bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c '#{command}'`
     else
-      `bosh -d #{deployment_name} ssh -c #{command}`
+      `bosh -d #{deployment_name} ssh -c '#{command}'`
     end
   end
 
