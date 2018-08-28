@@ -104,6 +104,29 @@ module UnitTestsUtils::Bosh
     end
   end
 
+  # returns an array of json object containing all the informations about the instances
+  # HINT: Consul DNS Name does only conatain hostpart!
+  def self.get_deployment_info(deployment_name)
+    json = JSON.parse(`bosh --non-interactive -d #{deployment_name} instances --json -i`)
+
+    result = Array.new
+    json['Tables'].first['Rows'].each do |row|
+      instancegroupname = row['instance'].split("/")[0]
+      id = row['instance'].split("/")[1]
+      result << { "instancegroupname" => instancegroupname, "id" => id, "index" => row["index"], "ip" => row["ips"], "cid" => row["vm_cid"], "az" => row["az"], "consuldnsname" => "#{deployment_name}-#{instancegroupname}-#{row["index"]}", "bootstrap" => row["bootstrap"] }
+    end
+    return result
+  end
+
+  def get_id_for_index(deployment_name, instancename, jobindex)
+    deployment_info = get_deployment_info(deployment_name)
+    deployment_info.each do |instance|
+      if instance['instancegroupname'] == instancename && instance['index'] == jobindex
+        return instance['id']
+      end
+    end
+  end
+
 
   private
 
