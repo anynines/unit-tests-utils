@@ -6,7 +6,11 @@ module UnitTestsUtils::InternalDNS
   end
 
   def self.resolve_domain_name(hostname)
-    `dig +short #{hostname} @#{nameserver_ip}`.strip.split("\n")
+    if self.valid_ips?([hostname])
+      return [hostname]
+    end
+
+    return `dig +short #{hostname} @#{nameserver_ip}`.strip.split("\n")
   end
 
   def self.host_addresses(hostnames, port)
