@@ -1,4 +1,5 @@
 require 'json'
+require 'open3'
 
 module UnitTestsUtils::Bosh
   def self.deploy(deployment_name, manifest_path, additional_vars = [])
@@ -6,79 +7,42 @@ module UnitTestsUtils::Bosh
     vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
     additional_vars.each { |key, value| vars << " --var #{key}=#{value}" }
 
-    `bosh --non-interactive -d #{deployment_name} deploy #{vars} #{manifest_path}`
-    exit_status=$?
-
-    if !exit_status.nil? && exit_status.to_i > 0
-      raise BoshError.new("Deploy failed  - exit_status: #{exit_status}")
-    end
+    execute_or_raise_error("bosh --non-interactive -d #{deployment_name} deploy #{vars} #{manifest_path}", "Deploy failed")
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.delete_deployment(deployment_name)
-    `bosh --non-interactive -d #{deployment_name} delete-deployment --force`
-    exit_status=$?
-
-    if !exit_status.nil? && exit_status.to_i > 0
-      raise BoshError.new("Delete deployment failed  - exit_status: #{exit_status}")
-    end
+    execute_or_raise_error("bosh --non-interactive -d #{deployment_name} delete-deployment --force", "Delete deployment failed")
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.start_instance(deployment_name, instance_name, index = '0', debug = true)
     if debug
-      `bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force`
+      execute_or_raise_error("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force", "Starting instance failed")
     else
-      `bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force > /dev/null 2> /dev/null`
-    end
-    exit_status=$?
-
-    if !exit_status.nil? && exit_status.to_i > 0
-      raise BoshError.new("Starting instance failed  - exit_status: #{exit_status}")
+      execute_or_raise_error("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force > /dev/null 2> /dev/null", "Starting instance failed")
     end
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.stop_instance(deployment_name, instance_name, index = '0', params = "--hard --force")
-    `bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} #{params}`
-    exit_status=$?
-
-    if !exit_status.nil? && exit_status.to_i > 0
-      raise BoshError.new("Stopping instance failed  - exit_status: #{exit_status}")
-    end
+    execute_or_raise_error("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} #{params}", "Stopping instance failed")
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.create_and_upload_dev_release(base_dir, release_name, version_prefix = '')
     version = dev_release_version(version_prefix)
-    raw_json = `bosh --json create-release --dir #{base_dir} --name #{release_name} --version #{version} --force`
-    exit_status=$?
-
-    if !exit_status.nil? && exit_status.to_i > 0
-      raise BoshError.new("Creating release failed  - exit_status: #{exit_status}")
-    end
-
+    raw_json = execute_or_raise_error("bosh --json create-release --dir #{base_dir} --name #{release_name} --version #{version} --force", "Creating release failed")
     metadata = parse_json_from_create_release(raw_json)
 
     release_name = "#{metadata[:unit_test_release_name]}-#{metadata[:unit_test_release_version]}.yml"
     release_path = File.join(base_dir, 'dev_releases', metadata[:unit_test_release_name], release_name)
-    `bosh upload-release --dir #{base_dir} #{release_path}`
-    exit_status=$?
-
-    if !exit_status.nil? && exit_status.to_i > 0
-      raise BoshError.new("Release upload failed  - exit_status: #{exit_status}")
-    end
+    execute_or_raise_error("bosh upload-release --dir #{base_dir} #{release_path}", "Uploading release failed")
     metadata
   end
 
   def self.instance_status(deployment_name, instance_name, index = nil)
-    output = `bosh --non-interactive -d #{deployment_name} instances --details --json`
-    exit_status=$?
-
-    if !exit_status.nil? && exit_status.to_i > 0
-      raise BoshError.new("Instance status failed  - exit_status: #{exit_status}")
-    end
-
+    output = execute_or_raise_error("bosh --non-interactive -d #{deployment_name} instances --details --json", "Instance status failed")
     json = JSON.parse(output)
 
     raise Exception.new("Could not find 'Tables'. Maybe this is a request timeout.") if json['Tables'].nil?
@@ -93,21 +57,23 @@ module UnitTestsUtils::Bosh
   def self.delete_release(release_name, release_version = nil)
     release_name << "/#{release_version}" unless release_version.nil?
 
-    `bosh --non-interactive delete-release #{release_name}`
+    execute_or_raise_error("bosh --non-interactive delete-release #{release_name}", "Delete release failed")
   end
 
   def self.ssh(deployment_name, command, instance_name = nil, index = '0')
     if instance_name
-      `bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c '#{command}'`
+
+      execute_or_raise_error("bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c '#{command}'", "Cannot execute command #{command}")
     else
-      `bosh -d #{deployment_name} ssh -c '#{command}'`
+      execute_or_raise_error("bosh -d #{deployment_name} ssh -c '#{command}'", "Cannot execute command #{command}")
     end
   end
 
-  # returns an array of json object containing all the informations about the instances
+  # returns an array of json object containing all the information about the instances
   # HINT: Consul DNS Name does only conatain hostpart!
   def self.get_deployment_info(deployment_name)
-    json = JSON.parse(`bosh --non-interactive -d #{deployment_name} instances --json -i`)
+    raw_json = execute_or_raise_error("bosh --non-interactive -d #{deployment_name} instances --json -i", "Cannot generate JSON with instances information")
+    json = JSON.parse(raw_json)
 
     result = Array.new
     json['Tables'].first['Rows'].each do |row|
@@ -131,7 +97,7 @@ module UnitTestsUtils::Bosh
   private
 
   def self.wait_for_task_to_finish(deployment_name)
-    `bosh -d #{deployment_name} task > /dev/null 2>&1`
+    execute_or_raise_error("bosh -d #{deployment_name} task > /dev/null 2>&1", "Cannot wait for task to finish")
   end
 
   def self.dev_release_version(version_prefix)
@@ -157,6 +123,15 @@ module UnitTestsUtils::Bosh
       unit_test_release_commit_hash: metadata['commit_hash']
     }
   end
+
+  def self.execute_or_raise_error(command, msg)
+    stdout, stderr, exit_status = Open3.capture3(command)
+    if !exit_status.nil? && exit_status.to_i > 0
+      raise BoshError.new("#{msg} - exit_status: #{exit_status}\nstdout: #{stdout}\nstderr: #{stderr}")
+    end
+    return stdout
+  end
+
 
   class BoshError < StandardError; end
 end
