@@ -8,6 +8,18 @@ describe UnitTestsUtils::Bosh do
   let(:instance_name)   { "database" }
   let(:release_name)    { "release_name" }
   let(:release_version) { "0+dev.1" }
+  let(:bosh_error_messages)    { {
+    create_release: 'Creating release failed',
+    delete_deployment: 'Delete deployment failed',
+    delete_release: 'Delete release failed',
+    deploy: 'Deploy failed',
+    instances: 'Instance status failed',
+    ssh: 'Cannot execute command ',
+    start: 'Starting instance failed',
+    stop: 'Stopping instance failed',
+    task: 'Cannot wait for task to finish',
+    upload_release: 'Uploading release failed'
+  } }
 
   describe ".deploy" do
     let(:path_to_creds) { './config.yml' }
@@ -28,8 +40,8 @@ describe UnitTestsUtils::Bosh do
 
       context "when NO additional vars are given" do
         it "runs a bosh deployment" do
-          expect(UnitTestsUtils::Bosh).to receive(:`).once.
-            with("bosh --non-interactive -d #{deployment_name} deploy -l #{ENV['PATH_TO_IAAS_CONFIG']} -l #{ENV['PATH_TO_CREDS']} #{manifest_path}").
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh --non-interactive -d #{deployment_name} deploy -l #{ENV['PATH_TO_IAAS_CONFIG']} -l #{ENV['PATH_TO_CREDS']} #{manifest_path}", bosh_error_messages[:deploy]).
             and_return(nil)
           expect(UnitTestsUtils::Bosh).to receive(:`).once.
             with("bosh -d #{deployment_name} task > /dev/null 2>&1")
@@ -40,8 +52,8 @@ describe UnitTestsUtils::Bosh do
 
       context "when additional vars are given" do
         it "runs a bosh deployment" do
-          expect(UnitTestsUtils::Bosh).to receive(:`).once.
-            with("bosh --non-interactive -d #{deployment_name} deploy -l #{ENV['PATH_TO_IAAS_CONFIG']} -l #{ENV['PATH_TO_CREDS']} #{additional_vars_string} #{manifest_path}").
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh --non-interactive -d #{deployment_name} deploy -l #{ENV['PATH_TO_IAAS_CONFIG']} -l #{ENV['PATH_TO_CREDS']} #{additional_vars_string} #{manifest_path}", bosh_error_messages[:deploy]).
             and_return(nil)
           expect(UnitTestsUtils::Bosh).to receive(:`).once.
             with("bosh -d #{deployment_name} task > /dev/null 2>&1")
@@ -59,8 +71,8 @@ describe UnitTestsUtils::Bosh do
 
       context "when NO additional vars are given" do
         it "runs a bosh deployment" do
-          expect(UnitTestsUtils::Bosh).to receive(:`).once.
-            with("bosh --non-interactive -d #{deployment_name} deploy -l #{ENV['PATH_TO_IAAS_CONFIG']} #{manifest_path}").
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh --non-interactive -d #{deployment_name} deploy -l #{ENV['PATH_TO_IAAS_CONFIG']} #{manifest_path}", bosh_error_messages[:deploy]).
             and_return(nil)
           expect(UnitTestsUtils::Bosh).to receive(:`).once.
             with("bosh -d #{deployment_name} task > /dev/null 2>&1")
@@ -71,8 +83,8 @@ describe UnitTestsUtils::Bosh do
 
       context "when additional vars are given" do
         it "runs a bosh deployment" do
-          expect(UnitTestsUtils::Bosh).to receive(:`).once.
-            with("bosh --non-interactive -d #{deployment_name} deploy -l #{ENV['PATH_TO_IAAS_CONFIG']} #{additional_vars_string} #{manifest_path}").
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh --non-interactive -d #{deployment_name} deploy -l #{ENV['PATH_TO_IAAS_CONFIG']} #{additional_vars_string} #{manifest_path}", bosh_error_messages[:deploy]).
             and_return(nil)
           expect(UnitTestsUtils::Bosh).to receive(:`).once.
             with("bosh -d #{deployment_name} task > /dev/null 2>&1")
@@ -85,8 +97,8 @@ describe UnitTestsUtils::Bosh do
 
   describe ".delete_deployment" do
     it "runs a bosh delete-deployment" do
-      expect(UnitTestsUtils::Bosh).to receive(:`).once.
-        with("bosh --non-interactive -d #{deployment_name} delete-deployment --force")
+      expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+        with("bosh --non-interactive -d #{deployment_name} delete-deployment --force", bosh_error_messages[:delete_deployment])
       expect(UnitTestsUtils::Bosh).to receive(:`).once.
         with("bosh -d #{deployment_name} task > /dev/null 2>&1")
 
@@ -98,8 +110,8 @@ describe UnitTestsUtils::Bosh do
     context "when the index is given" do
       let(:index) { 1 }
       it "runs a bosh start on the given instance and index" do
-        expect(UnitTestsUtils::Bosh).to receive(:`).once.
-          with("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force")
+        expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+          with("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force", bosh_error_messages[:start])
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
           with("bosh -d #{deployment_name} task > /dev/null 2>&1")
 
@@ -109,8 +121,8 @@ describe UnitTestsUtils::Bosh do
 
     context "when the index is not given" do
       it "runs a bosh start on the given instance with index 0" do
-        expect(UnitTestsUtils::Bosh).to receive(:`).once.
-          with("bosh --non-interactive -d #{deployment_name} start #{instance_name}/0 --force")
+        expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+          with("bosh --non-interactive -d #{deployment_name} start #{instance_name}/0 --force", bosh_error_messages[:start])
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
           with("bosh -d #{deployment_name} task > /dev/null 2>&1")
 
@@ -123,8 +135,8 @@ describe UnitTestsUtils::Bosh do
     context "when the index is given" do
       let(:index) { 1 }
       it "runs a bosh stop on the given instance and index" do
-        expect(UnitTestsUtils::Bosh).to receive(:`).once.
-          with("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} --hard --force")
+        expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+          with("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} --hard --force", bosh_error_messages[:stop])
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
           with("bosh -d #{deployment_name} task > /dev/null 2>&1")
 
@@ -134,8 +146,8 @@ describe UnitTestsUtils::Bosh do
 
     context "when the index is not given" do
       it "runs a bosh stop on the given instance with index 0" do
-        expect(UnitTestsUtils::Bosh).to receive(:`).once.
-          with("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/0 --hard --force")
+        expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+          with("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/0 --hard --force", bosh_error_messages[:stop])
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
           with("bosh -d #{deployment_name} task > /dev/null 2>&1")
 
@@ -159,12 +171,12 @@ describe UnitTestsUtils::Bosh do
     it "runs a bosh create-release and upload-release" do
       allow(UnitTestsUtils::Bosh).to receive(:dev_release_version).and_return(release_version)
 
-      expect(UnitTestsUtils::Bosh).to receive(:`).once.
+      expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
         with("bosh --json create-release --dir #{base_dir} --name #{release_name} --version " \
-             "#{release_version} --force").
+             "#{release_version} --force", bosh_error_messages[:create_release]).
         and_return(bosh_release_output(release_name, release_version))
-      expect(UnitTestsUtils::Bosh).to receive(:`).once.
-        with("bosh upload-release --dir #{base_dir} #{release_path}")
+      expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+        with("bosh upload-release --dir #{base_dir} #{release_path}", bosh_error_messages[:upload_release])
 
       expect(UnitTestsUtils::Bosh.create_and_upload_dev_release(base_dir, release_name)).to eq metadata
     end
@@ -182,8 +194,8 @@ describe UnitTestsUtils::Bosh do
 
   describe ".delete_release" do
     it "runs a bosh delete-release" do
-      expect(UnitTestsUtils::Bosh).to receive(:`).once.
-        with("bosh --non-interactive delete-release #{release_name}")
+      expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+        with("bosh --non-interactive delete-release #{release_name}", bosh_error_messages[:delete_release])
 
       UnitTestsUtils::Bosh.delete_release(release_name)
     end
@@ -197,8 +209,8 @@ describe UnitTestsUtils::Bosh do
         let(:index) { "1" }
 
         it "runs bosh ssh" do
-          expect(UnitTestsUtils::Bosh).to receive(:`).once.
-            with("bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c '#{command}'")
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c '#{command}'", bosh_error_messages[:ssh] + command)
 
           UnitTestsUtils::Bosh.ssh(deployment_name, command, instance_name, index)
         end
@@ -206,8 +218,8 @@ describe UnitTestsUtils::Bosh do
 
       context "when the index is not given" do
         it "runs bosh ssh" do
-          expect(UnitTestsUtils::Bosh).to receive(:`).once.
-            with("bosh -d #{deployment_name} ssh #{instance_name}/0 -c '#{command}'")
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh -d #{deployment_name} ssh #{instance_name}/0 -c '#{command}'", bosh_error_messages[:ssh] + command)
 
           UnitTestsUtils::Bosh.ssh(deployment_name, command, instance_name)
         end
@@ -216,8 +228,8 @@ describe UnitTestsUtils::Bosh do
 
     context "when no instance is given" do
       it "runs bosh ssh" do
-        expect(UnitTestsUtils::Bosh).to receive(:`).once.
-          with("bosh -d #{deployment_name} ssh -c '#{command}'")
+        expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+          with("bosh -d #{deployment_name} ssh -c '#{command}'", bosh_error_messages[:ssh] + command)
 
         UnitTestsUtils::Bosh.ssh(deployment_name, command)
       end
@@ -227,8 +239,8 @@ describe UnitTestsUtils::Bosh do
   describe ".instance_status" do
     context "when the index is not given" do
       it "runs a bosh instance" do
-        expect(UnitTestsUtils::Bosh).to receive(:`).once.
-          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+        expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json", bosh_error_messages[:instances]).
           and_return(Fixtures.file_content('bosh-instances-details-output.json'))
 
         result = UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name)
@@ -238,8 +250,8 @@ describe UnitTestsUtils::Bosh do
 
     context "when the index is given" do
       it "runs a bosh instance" do
-        expect(UnitTestsUtils::Bosh).to receive(:`).once.
-          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+        expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json", bosh_error_messages[:instances]).
           and_return(Fixtures.file_content('bosh-instances-details-output.json'))
 
         result = UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name, "0")
@@ -250,8 +262,8 @@ describe UnitTestsUtils::Bosh do
 
     context "when bosh is unavailable" do
       it "raises an exception" do
-        expect(UnitTestsUtils::Bosh).to receive(:`).once.
-          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+        expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json", bosh_error_messages[:instances]).
           and_return(Fixtures.file_content('bosh-instances-ps-error.json'))
 
         expect do
@@ -262,13 +274,42 @@ describe UnitTestsUtils::Bosh do
 
     context "when bosh gives an invalid json as response" do
       it "raises a json exception" do
-        expect(UnitTestsUtils::Bosh).to receive(:`).once.
-          with("bosh --non-interactive -d #{deployment_name} instances --details --json").
+        expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+          with("bosh --non-interactive -d #{deployment_name} instances --details --json", bosh_error_messages[:instances]).
           and_return(Fixtures.file_content('bosh-invalid-json-output.json'))
 
         expect do
           UnitTestsUtils::Bosh.instance_status(deployment_name, instance_name)
         end.to raise_error(JSON::ParserError)
+      end
+    end
+  end
+
+  describe ".execute_or_raise_error" do
+    context "when the command returns a zero status" do
+      it "returns the command's stdout" do
+        return_message = ''
+        raised_error = false
+        begin
+          return_message = UnitTestsUtils::Bosh.execute_or_raise_error("echo myteststring", "this is not meant to fail")
+        rescue UnitTestsUtils::Bosh::BoshError => e
+          raises_error = true
+        end
+        expect(return_message).to eql("myteststring\n")
+        expect(raises_error).to be_falsy
+      end
+    end
+
+    context "when the command returns a non-zero status" do
+      it "raises a BOSH exception with error message" do
+        raised_error = false
+        begin
+          UnitTestsUtils::Bosh.execute_or_raise_error("/usr/bin/env false", "this is meant to fail")
+        rescue UnitTestsUtils::Bosh::BoshError => e
+          expect(e.message).to match(/this is meant to fail - exit_status: pid [0-9]+ exit 1\s*stdout:\s*stderr:\s*/)
+          raises_error = true
+        end
+        expect(raises_error).to be_truthy
       end
     end
   end
