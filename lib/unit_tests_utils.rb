@@ -4,4 +4,5 @@ module UnitTestsUtils
   autoload :InternalDNS, 'unit_tests_utils/internal_dns.rb'
   autoload :Manifest, 'unit_tests_utils/manifest.rb'
   autoload :Git, 'unit_tests_utils/git.rb'
+  autoload :PGWebServiceClient, 'unit_tests_utils/postgresql_web_service_client.rb'
 end
