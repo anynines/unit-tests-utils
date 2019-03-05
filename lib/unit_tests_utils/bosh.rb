@@ -93,6 +93,13 @@ module UnitTestsUtils::Bosh
     end
   end
 
+  def self.interpolate(deployment_name, manifest_path, additional_vars = [])
+    vars = "-l #{ENV['PATH_TO_IAAS_CONFIG']}"
+    vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
+    additional_vars.each { |key, value| vars << " --var #{key}=#{value}" }
+
+    execute_or_raise_error("bosh interpolate --var-errs #{vars} #{manifest_path}", "Interpolate failed")
+  end
 
   private
 
