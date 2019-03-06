@@ -31,7 +31,7 @@ class UnitTestsUtils::Manifest
 
   def initialize(manifest_path, additional_vars = {})
     @path = manifest_path
-    interpolated_manifest = UnitTestsUtils::Bosh.interpolate(manifest.path, additional_vars)
+    interpolated_manifest = UnitTestsUtils::Bosh.interpolate(manifest_path, additional_vars)
     @manifest = YAML.load(interpolated_manifest)
     @additional_vars = Hash[additional_vars.map { |key, value| [key.to_sym, value] }]
   end
