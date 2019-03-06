@@ -15,6 +15,7 @@ describe UnitTestsUtils::Bosh do
     deploy: 'Deploy failed',
     instances: 'Instance status failed',
     ssh: 'Cannot execute command ',
+    interpolate: 'Interpolate failed',
     start: 'Starting instance failed',
     stop: 'Stopping instance failed',
     task: 'Cannot wait for task to finish',
@@ -232,6 +233,67 @@ describe UnitTestsUtils::Bosh do
           with("bosh -d #{deployment_name} ssh -c '#{command}'", bosh_error_messages[:ssh] + command)
 
         UnitTestsUtils::Bosh.ssh(deployment_name, command)
+      end
+    end
+  end
+
+  describe ".interpolate" do
+    let(:path_to_creds) { Fixtures.file_path 'creds.yml' }
+    let(:path_to_iaas_config) { Fixtures.file_path 'iaas_config.yml' }
+    let(:additional_vars) { { key1: 'value1', key2: 'value2' } }
+    let(:additional_vars_string) { additional_vars.map { |key, value| "--var #{key}=#{value}" }.join(' ') }
+
+    context "when the PATH_TO_CREDS env var is set" do
+      before :each do
+        stubbed_env = ENV.clone
+        stubbed_env['PATH_TO_IAAS_CONFIG'] = path_to_iaas_config
+        stubbed_env['PATH_TO_CREDS'] = path_to_creds
+        stub_const('ENV', stubbed_env)
+      end
+
+      context "when NO additional vars are given" do
+        it "interpolates a deployment manifest" do
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh interpolate -l #{ENV['PATH_TO_IAAS_CONFIG']} -l #{ENV['PATH_TO_CREDS']} #{manifest_path}", bosh_error_messages[:interpolate])
+
+          UnitTestsUtils::Bosh.interpolate(manifest_path)
+        end
+      end
+
+      context "when additional vars are given" do
+        it "interpolates a deployment manifest" do
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh interpolate -l #{ENV['PATH_TO_IAAS_CONFIG']} -l #{ENV['PATH_TO_CREDS']} #{additional_vars_string} #{manifest_path}", bosh_error_messages[:interpolate])
+
+          UnitTestsUtils::Bosh.interpolate(manifest_path, additional_vars)
+        end
+      end
+    end
+
+    context "when the PATH_TO_CREDS env var is not set" do
+      before :each do
+        stubbed_env = ENV.clone
+        stubbed_env['PATH_TO_IAAS_CONFIG'] = path_to_iaas_config
+        stubbed_env['PATH_TO_CREDS'] = nil
+        stub_const('ENV', stubbed_env)
+      end
+
+      context "when NO additional vars are given" do
+        it "interpolates a deployment manifest" do
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh interpolate -l #{ENV['PATH_TO_IAAS_CONFIG']} #{manifest_path}", bosh_error_messages[:interpolate])
+
+          UnitTestsUtils::Bosh.interpolate(manifest_path)
+        end
+      end
+
+      context "when additional vars are given" do
+        it "interpolates a deployment manifest" do
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh interpolate -l #{ENV['PATH_TO_IAAS_CONFIG']} #{additional_vars_string} #{manifest_path}", bosh_error_messages[:interpolate])
+
+          UnitTestsUtils::Bosh.interpolate(manifest_path, additional_vars)
+        end
       end
     end
   end

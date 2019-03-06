@@ -4,7 +4,10 @@ require_relative '../../../lib/unit_tests_utils/'
 describe UnitTestsUtils::Manifest do
   let(:manifest_path) { Fixtures.file_path("manifest-with-static-name.yml") }
   let(:manifest_additional_vars) { { unit_test_name: 'service-ha', key1: 'value1', key2: 'value2' } }
-  let(:manifest_yaml) { YAML.load_file(manifest_path) }
+  let(:manifest_yaml) {
+    interpolated_manifest = UnitTestsUtils::Bosh.interpolate(manifest_path, manifest_additional_vars)
+    YAML.load(interpolated_manifest)
+  }
   let(:manifest_instance_names) { ['database', 'backup'] }
   let(:manifest_hostnames) { {
     "database/0" => "service-ha-database-0.node.datacenter.foo",
@@ -13,6 +16,15 @@ describe UnitTestsUtils::Manifest do
     "backup/0" => "service-ha-backup-0.node.datacenter.foo"
   } }
   let(:manifest) { UnitTestsUtils::Manifest.new(manifest_path) }
+  let(:path_to_creds) { Fixtures.file_path 'creds.yml' }
+  let(:path_to_iaas_config) { Fixtures.file_path 'iaas_config.yml' }
+
+  before :each do
+    stubbed_env = ENV.clone
+    stubbed_env['PATH_TO_IAAS_CONFIG'] = path_to_iaas_config
+    stubbed_env['PATH_TO_CREDS'] = path_to_creds
+    stub_const('ENV', stubbed_env)
+  end
 
   describe ".create" do
     context "when no manifest with the name exists" do
@@ -122,7 +134,10 @@ describe UnitTestsUtils::Manifest do
 
     context "when name is dynamic and NOT set in the additional vars" do
       let(:manifest_path) { Fixtures.file_path("manifest-with-dynamic-name.yml") }
-      let(:manifest_yaml) { YAML.load_file(manifest_path) }
+      let(:manifest_yaml) {
+        interpolated_manifest = UnitTestsUtils::Bosh.interpolate(manifest_path, manifest_additional_vars)
+        YAML.load(interpolated_manifest)
+      }
       let(:manifest) { UnitTestsUtils::Manifest.new(manifest_path) }
 
       it "returns the dynamic name" do
