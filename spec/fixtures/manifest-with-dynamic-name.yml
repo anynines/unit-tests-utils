@@ -4,8 +4,16 @@ name: ((unit_test_name))
 instance_groups:
 - name: database
   instances: 3
+  networks:
+  - name: dynamic
+  properties:
+    network: dynamic
 - name: backup
   instances: 1
+  networks:
+  - name: dynamic
+  properties:
+    network: dynamic
 
 properties:
   consul:
