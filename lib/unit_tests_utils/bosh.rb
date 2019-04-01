@@ -11,6 +11,17 @@ module UnitTestsUtils::Bosh
     wait_for_task_to_finish(deployment_name)
   end
 
+  # deploy_manifest deploys from the internal manifest rather than a manifest at
+  # a file path.
+  def self.deploy_manifest(deployment_name, manifest, additional_vars = [])
+    vars = "-l #{ENV['PATH_TO_IAAS_CONFIG']}"
+    vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
+    additional_vars.each { |key, value| vars << " --var #{key}=#{value}" }
+
+    execute_or_raise_error_in("bosh --non-interactive -d #{deployment_name} deploy #{vars} -", manifest.manifest.to_yaml, "Deploy failed")
+    wait_for_task_to_finish(deployment_name)
+  end
+
   def self.delete_deployment(deployment_name)
     execute_or_raise_error("bosh --non-interactive -d #{deployment_name} delete-deployment --force", "Delete deployment failed")
     wait_for_task_to_finish(deployment_name)
@@ -141,6 +152,15 @@ module UnitTestsUtils::Bosh
     return stdout
   end
 
+  # execute_or_raise_error_in executes the command with stdin provided and
+  # raises an error if the command is unsuccessful.
+  def self.execute_or_raise_error_in(stdin, command, msg)
+    stdout, stderr, exit_status = Open3.capture3(command, stdin_data: stdin)
+    if !exit_status.nil? && exit_status.to_i > 0
+      raise BoshError.new("#{msg} - exit_status: #{exit_status}\nstdout: #{stdout}\nstderr: #{stderr}")
+    end
+    return stdout
+  end
 
   class BoshError < StandardError; end
 end
