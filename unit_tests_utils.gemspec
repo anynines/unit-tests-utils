@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = 'unit-tests-utils'
-  s.version     = '1.9.1'
+  s.version     = '1.9.2'
   s.date        = '2019-04-02'
   s.summary     = 'Common unit tests utils'
   s.description = 'This gems includes all resources needed for the a9s BOSH release unit tests.'
