@@ -104,7 +104,7 @@ class UnitTestsUtils::Manifest
     ig = instance_group(instance_name)
     ig['networks'].delete_if { |n| n['name'] == old_network }
     ig['properties']['network'] = new_network
-    ig['networks'].append( { "name" => new_network }  )
+    ig['networks'].push( { "name" => new_network }  )
   end
 
   private
