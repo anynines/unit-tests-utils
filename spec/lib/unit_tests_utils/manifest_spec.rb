@@ -194,4 +194,21 @@ describe UnitTestsUtils::Manifest do
       expect(manifest.properties).to eq manifest_properties
     end
   end
+
+  describe "#get_network" do
+    let(:default_network) { "dynamic" }
+
+    it "returns the default network when manifest unmodified" do
+      expect(manifest.get_network(manifest.instance_names.first)).to eq default_network
+    end
+  end
+
+  describe "#set_network" do
+    let(:new_network) { "relocated" }
+
+    it "sets the network properties in the manifest and we an get it" do
+      manifest.set_network(manifest.instance_names.first, new_network)
+      expect(manifest.get_network(manifest.instance_names.first)).to eq new_network
+    end
+  end
 end

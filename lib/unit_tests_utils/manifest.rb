@@ -54,9 +54,7 @@ class UnitTestsUtils::Manifest
   end
 
   def instance_count(instance_name)
-    manifest['instance_groups']
-      .select { |instance_group| instance_group['name'] == instance_name }
-      .first['instances']
+    instance_group(instance_name)['instances']
   end
 
   def hostname(instance_name = nil, index = '0')
@@ -82,5 +80,38 @@ class UnitTestsUtils::Manifest
 
   def properties
     manifest['properties']
+  end
+
+  # get_network returns the network of listed in the deployment manifest. This
+  # is not necessarily what is in the manifest file as the property can be
+  # altered with set_network. The network returned is the value of
+  # properties.network for the instance group that is named identically to the
+  # instance name.
+  # Raises an exception if the properties.network is not found in the networks
+  # section of the instance group.
+  def get_network(instance_name)
+    network = instance_group(instance_name)['properties']['network']
+    if instance_group(instance_name)['networks'].any? { |n| n['name'] == network }
+      return network
+    end
+    raise "properties.network was not found in networks"
+  end
+
+  # set_network changes the network in the internal representation of the
+  # manifest. This function does not effect what is in the manifest file.
+  def set_network(instance_name, new_network)
+    old_network = get_network(instance_name)
+    ig = instance_group(instance_name)
+    ig['networks'].delete_if { |n| n['name'] == old_network }
+    ig['properties']['network'] = new_network
+    ig['networks'].append( { "name" => new_network }  )
+  end
+
+  private
+
+  def instance_group(instance_name)
+    manifest['instance_groups']
+      .select { |instance_group| instance_group['name'] == instance_name }
+      .first
   end
 end
