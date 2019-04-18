@@ -70,7 +70,11 @@ class UnitTestsUtils::Manifest
 
       instance_names.each do |instance_name|
         instance_count(instance_name).times do |index|
-          hostnames["#{instance_name}/#{index}"] = "#{name}-#{instance_name}-#{index}.node.#{properties['consul']['dc']}.#{properties['consul']['domain']}"
+          if properties
+            hostnames["#{instance_name}/#{index}"] = "#{name}-#{instance_name}-#{index}.node.#{properties['consul']['dc']}.#{properties['consul']['domain']}"
+          else
+            hostnames["#{instance_name}/#{index}"] = "#{name}-#{instance_name}-#{index}.node.#{properties_for_instance_group(instance_name)['consul']['dc']}.#{properties_for_instance_group(instance_name)['consul']['domain']}"
+          end
         end
       end
 
@@ -80,6 +84,10 @@ class UnitTestsUtils::Manifest
 
   def properties
     manifest['properties']
+  end
+
+  def properties_for_instance_group(instance_name)
+    instance_group(instance_name)['properties']
   end
 
   # get_network returns the network of listed in the deployment manifest. This

@@ -182,17 +182,44 @@ describe UnitTestsUtils::Manifest do
   end
 
   describe "#hostnames" do
-    it "returns all the hostnames of the manifest" do
-      expect(manifest.hostnames). to eq manifest_hostnames
+    context "when manifest contains global properties" do
+      it "returns all the hostnames of the manifest" do
+        expect(manifest.hostnames). to eq manifest_hostnames
+      end
     end
+
+    context "when manifest contains local properties" do
+      let(:manifest_path) { Fixtures.file_path("manifest-with-local-properties.yml") }
+      let(:manifest) { UnitTestsUtils::Manifest.new(manifest_path, manifest_additional_vars) }
+      it "returns all the hostnames of the manifest" do
+        expect(manifest.hostnames). to eq manifest_hostnames
+      end
+    end
+
   end
 
   describe "#properties" do
     let(:manifest_properties) { { "consul" => { "dc" => "datacenter", "domain" => "foo" } } }
 
-    it "returns a hash of the properties" do
-      expect(manifest.properties).to eq manifest_properties
+    context "when manifest contains global properties" do
+      it "returns a hash of the properties" do
+        expect(manifest.properties).to eq manifest_properties
+      end
     end
+
+    context "when manifest contains local properties" do
+      let(:manifest_path) { Fixtures.file_path("manifest-with-local-properties.yml") }
+      let(:manifest) { UnitTestsUtils::Manifest.new(manifest_path, manifest_additional_vars) }
+
+      it "returns nil as global properties" do
+        expect(manifest.properties).to eq nil
+      end
+
+      it "return instance group specific property hash" do
+        expect(manifest.properties_for_instance_group("database")).to eq manifest_properties
+      end
+    end
+
   end
 
   describe "#get_network" do
