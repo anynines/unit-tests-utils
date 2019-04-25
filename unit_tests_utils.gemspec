@@ -13,10 +13,11 @@ Gem::Specification.new do |s|
     'lib/unit_tests_utils.rb',
     'lib/unit_tests_utils/bosh.rb',
     'lib/unit_tests_utils/consul.rb',
+    'lib/unit_tests_utils/git.rb',
     'lib/unit_tests_utils/internal_dns.rb',
     'lib/unit_tests_utils/manifest.rb',
-    'lib/unit_tests_utils/git.rb',
-    'lib/unit_tests_utils/postgresql_web_service_client.rb'
+    'lib/unit_tests_utils/postgresql_web_service_client.rb',
+    'lib/unit_tests_utils/turbulence.rb',
   ]
   s.homepage    = 'http://www.anynines.com/'
   s.license     = 'Nonstandard'
