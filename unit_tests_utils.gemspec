@@ -2,12 +2,12 @@
 
 Gem::Specification.new do |s|
   s.name        = 'unit-tests-utils'
-  s.version     = '1.9.2'
-  s.date        = '2019-04-02'
+  s.version     = '1.9.3'
+  s.date        = '2019-05-25'
   s.summary     = 'Common unit tests utils'
   s.description = 'This gems includes all resources needed for the a9s BOSH release unit tests.'
   s.authors     = ['Michael Lieser', 'Dennis Groß', 'Lucas Pinto', 'Kevin Konrad',
-                    'Jens Breuer', 'Khaled Blah', 'Morgan Hill']
+                    'Jens Breuer', 'Khaled Blah', 'Morgan Hill', 'Thomas Bruckmann']
   s.email       = 'support@anynines.com'
   s.files       = [
     'lib/unit_tests_utils.rb',
