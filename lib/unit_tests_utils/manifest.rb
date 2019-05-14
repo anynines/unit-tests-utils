@@ -107,8 +107,6 @@ class UnitTestsUtils::Manifest
     ig['networks'].push( { "name" => new_network }  )
   end
 
-  private
-
   def instance_group(instance_name)
     manifest['instance_groups']
       .select { |instance_group| instance_group['name'] == instance_name }
