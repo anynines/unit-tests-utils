@@ -26,7 +26,7 @@ describe UnitTestsUtils::Bosh do
     let(:path_to_creds) { './config.yml' }
     let(:path_to_iaas_config) { './iaas_config.yml' }
     let(:additional_vars) { { key1: 'value1', key2: 'value2' } }
-    let(:additional_vars_string) { additional_vars.map { |key, value| "--var #{key}=#{value}" }.join(' ') }
+    let(:additional_vars_string) { additional_vars.map { |key, value| "--var #{key}='#{value}'" }.join(' ') }
 
     before :each do
       expect(ENV).to receive(:[]).with('PATH_TO_IAAS_CONFIG').at_least(:once).
@@ -241,7 +241,7 @@ describe UnitTestsUtils::Bosh do
     let(:path_to_creds) { Fixtures.file_path 'creds.yml' }
     let(:path_to_iaas_config) { Fixtures.file_path 'iaas_config.yml' }
     let(:additional_vars) { { key1: 'value1', key2: 'value2' } }
-    let(:additional_vars_string) { additional_vars.map { |key, value| "--var #{key}=#{value}" }.join(' ') }
+    let(:additional_vars_string) { additional_vars.map { |key, value| "--var #{key}='#{value}'" }.join(' ') }
 
     context "when the PATH_TO_CREDS env var is set" do
       before :each do
@@ -351,10 +351,10 @@ describe UnitTestsUtils::Bosh do
     context "when the command returns a zero status" do
       it "returns the command's stdout" do
         return_message = ''
-        raised_error = false
+        raises_error = false
         begin
           return_message = UnitTestsUtils::Bosh.execute_or_raise_error("echo myteststring", "this is not meant to fail")
-        rescue UnitTestsUtils::Bosh::BoshError => e
+        rescue UnitTestsUtils::Bosh::BoshError => _
           raises_error = true
         end
         expect(return_message).to eql("myteststring\n")
@@ -364,7 +364,7 @@ describe UnitTestsUtils::Bosh do
 
     context "when the command returns a non-zero status" do
       it "raises a BOSH exception with error message" do
-        raised_error = false
+        raises_error = false
         begin
           UnitTestsUtils::Bosh.execute_or_raise_error("/usr/bin/env false", "this is meant to fail")
         rescue UnitTestsUtils::Bosh::BoshError => e

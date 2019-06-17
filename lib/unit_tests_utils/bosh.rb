@@ -5,7 +5,7 @@ module UnitTestsUtils::Bosh
   def self.deploy(deployment_name, manifest_path, additional_vars = [])
     vars = "-l #{ENV['PATH_TO_IAAS_CONFIG']}"
     vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
-    additional_vars.each { |key, value| vars << " --var #{key}=#{value}" }
+    additional_vars.each { |key, value| vars << " --var #{key}='#{value}'" }
 
     execute_or_raise_error("bosh --non-interactive -d #{deployment_name} deploy #{vars} #{manifest_path}", "Deploy failed")
     wait_for_task_to_finish(deployment_name)
@@ -16,7 +16,7 @@ module UnitTestsUtils::Bosh
   def self.deploy_manifest(deployment_name, manifest, additional_vars = [])
     vars = "-l #{ENV['PATH_TO_IAAS_CONFIG']}"
     vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
-    additional_vars.each { |key, value| vars << " --var #{key}=#{value}" }
+    additional_vars.each { |key, value| vars << " --var #{key}='#{value}'" }
 
     execute_or_raise_error_in("bosh --non-interactive -d #{deployment_name} deploy #{vars}", manifest.manifest.to_yaml, "Deploy failed")
     wait_for_task_to_finish(deployment_name)
@@ -107,7 +107,7 @@ module UnitTestsUtils::Bosh
   def self.interpolate(manifest_path, additional_vars = [], vars_errs = false)
     vars = "-l #{ENV['PATH_TO_IAAS_CONFIG']}"
     vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
-    additional_vars.each { |key, value| vars << " --var #{key}=#{value}" }
+    additional_vars.each { |key, value| vars << " --var #{key}='#{value}'" }
     options = []
     options << ' --var-errs' if vars_errs
 
