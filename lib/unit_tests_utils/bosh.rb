@@ -114,6 +114,10 @@ module UnitTestsUtils::Bosh
     execute_or_raise_error("bosh interpolate#{options.join(' ')} #{vars} #{manifest_path}", "Interpolate failed")
   end
 
+  def self.run_errand(deployment_name, errand_name)
+    execute_or_raise_error("bosh --non-interactive -d #{release_name} run-errand #{errand_name}", "Failed to run errand #{errand_name}")
+  end
+
   private
 
   def self.wait_for_task_to_finish(deployment_name)
