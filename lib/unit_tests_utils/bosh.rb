@@ -18,7 +18,10 @@ module UnitTestsUtils::Bosh
     vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
     additional_vars.each { |key, value| vars << " --var #{key}='#{value}'" }
 
-    execute_or_raise_error_in("bosh --non-interactive -d #{deployment_name} deploy #{vars}", manifest.manifest.to_yaml, "Deploy failed")
+    tmp_path = manifest.path + '.tmp'
+    File.write(tmp_path, manifest.to_yaml)
+
+    execute_or_raise_error("bosh --non-interactive -d #{deployment_name} deploy #{vars} #{manifest_path}", "Deploy failed")
     wait_for_task_to_finish(deployment_name)
   end
 
