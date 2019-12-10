@@ -4,14 +4,12 @@ require_relative '../../../lib/unit_tests_utils'
 describe UnitTestsUtils::RspecLogger do
   context 'when buffering' do
     subject(:logger) do
-      UnitTestsUtils::RspecLogger.instance.tap do |i|
+      UnitTestsUtils::RspecLogger.new.tap do |i|
         i.io_output = StringIO.new
       end
     end
 
     before do
-      logger.clear
-
       logger.debug('message0')
       logger.debug('message1')
     end
