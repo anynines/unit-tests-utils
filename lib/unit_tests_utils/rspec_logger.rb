@@ -1,19 +1,14 @@
 class UnitTestsUtils::RspecLogger
 
+  attr_reader :buffer
+  attr_accessor :io_output
+
   def initialize
     @io_output = $stdout
     @buffer = []
     @live_log = !ENV['UNIT_TEST_DEBUG'].nil? && ENV['UNIT_TEST_DEBUG'] == "true"
   end
 
-  @@instance = UnitTestsUtils::RspecLogger.new
-
-  def self.instance
-    @@instance
-  end
-
-  attr_reader :buffer
-  attr_accessor :io_output
 
   def debug(message)
     method = caller_locations.first
@@ -29,9 +24,6 @@ class UnitTestsUtils::RspecLogger
   def clear
     buffer.clear
   end
-
-  private_class_method :new
-
 
   attr_reader :live_log
 
