@@ -7,7 +7,8 @@ Gem::Specification.new do |s|
   s.summary     = 'Common unit tests utils'
   s.description = 'This gems includes all resources needed for the a9s BOSH release unit tests.'
   s.authors     = ['Michael Lieser', 'Dennis Groß', 'Lucas Pinto', 'Kevin Konrad',
-                    'Jens Breuer', 'Khaled Blah', 'Morgan Hill', 'Thomas Bruckmann']
+                    'Jens Breuer', 'Khaled Blah', 'Morgan Hill', 'Thomas Bruckmann',
+                    'Robert Gogolok', 'Heitor Meira']
   s.email       = 'support@anynines.com'
   s.files       = [
     'lib/unit_tests_utils.rb',
