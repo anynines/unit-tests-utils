@@ -5,5 +5,6 @@ module UnitTestsUtils
   autoload :InternalDNS, 'unit_tests_utils/internal_dns.rb'
   autoload :Manifest, 'unit_tests_utils/manifest.rb'
   autoload :PGWebServiceClient, 'unit_tests_utils/postgresql_web_service_client.rb'
+  autoload :RspecLogger, 'unit_tests_utils/rspec_logger.rb'
   autoload :Turbulence, 'unit_tests_utils/turbulence.rb'
 end
