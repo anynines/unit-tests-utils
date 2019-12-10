@@ -1,4 +1,6 @@
 require 'rspec'
+require 'json'
+require_relative '../lib/unit_tests_utils'
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 

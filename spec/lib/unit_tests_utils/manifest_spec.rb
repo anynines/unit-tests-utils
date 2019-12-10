@@ -1,5 +1,4 @@
 require 'spec_helper'
-require_relative '../../../lib/unit_tests_utils/'
 
 describe UnitTestsUtils::Manifest do
   let(:manifest_path) { Fixtures.file_path("manifest-with-static-name.yml") }

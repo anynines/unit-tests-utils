@@ -1,5 +1,4 @@
 require 'spec_helper'
-require_relative '../../../lib/unit_tests_utils'
 
 describe UnitTestsUtils::InternalDNS do
   let(:internal_dns_ip) { "1.2.3.4" }
