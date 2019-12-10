@@ -1,5 +1,4 @@
 require 'spec_helper'
-require_relative '../../../lib/unit_tests_utils'
 
 describe UnitTestsUtils::Git do
   let(:shortened_hash) { '01092b4' }
