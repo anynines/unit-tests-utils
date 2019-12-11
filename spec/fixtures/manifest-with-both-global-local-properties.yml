@@ -1,0 +1,19 @@
+---
+name: service-ha
+
+instance_groups:
+- name: database
+  jobs:
+    - name: job0
+      properties:
+        property0: 0
+- name: backup
+  jobs:
+    - name: job1
+      properties:
+        property1: 1
+
+properties:
+  consul:
+    dc: datacenter
+    domain: foo

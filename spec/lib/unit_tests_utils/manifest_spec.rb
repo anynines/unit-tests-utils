@@ -187,10 +187,30 @@ describe UnitTestsUtils::Manifest do
   end
 
   describe "#properties" do
-    let(:manifest_properties) { { "consul" => { "dc" => "datacenter", "domain" => "foo" } } }
+    context "when global properties are present only" do
+      let(:manifest_properties) { { "consul" => { "dc" => "datacenter", "domain" => "foo" } } }
 
-    it "returns a hash of the properties" do
-      expect(manifest.properties).to eq manifest_properties
+      it "returns a hash including the global properties" do
+        expect(manifest.properties).to eq manifest_properties
+      end
+    end
+
+    context "when local properties are present only" do
+      let(:manifest_path) { Fixtures.file_path("manifest-with-local-properties-only.yml") }
+      let(:manifest_properties) { { 'property0' => 0, 'property1' => 1 } }
+
+      it "returns a hash including the local properties" do
+        expect(manifest.properties).to eq manifest_properties
+      end
+    end
+
+    context "when both local and global properties are present" do
+      let(:manifest_path) { Fixtures.file_path("manifest-with-both-global-local-properties.yml") }
+      let(:manifest_properties) { {"consul"=>{"dc"=>"datacenter", "domain"=>"foo"}, "property0"=>0, "property1"=>1} }
+
+      it "returns a hash including both the global and local properties" do
+        expect(manifest.properties).to eq manifest_properties
+      end
     end
   end
 
