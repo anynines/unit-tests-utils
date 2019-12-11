@@ -79,7 +79,21 @@ class UnitTestsUtils::Manifest
   end
 
   def properties
-    manifest['properties']
+    {}.tap do |merged_properties|
+      instance_groups = manifest.dig('instance_groups')
+      instance_groups.each do |instance|
+        instance.each do |key,value|
+          if key == "jobs"
+            value.each do |job|
+              property = job.dig('properties')
+              merged_properties.merge!(property)
+            end
+          end
+        end
+      end
+
+      merged_properties.merge!(manifest['properties'] || {})
+    end
   end
 
   # get_network returns the network of listed in the deployment manifest. This
