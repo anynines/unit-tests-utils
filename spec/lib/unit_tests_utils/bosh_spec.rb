@@ -155,6 +155,24 @@ describe UnitTestsUtils::Bosh do
     end
   end
 
+  describe ".run_errand" do
+    let(:errand_name) { "myerrand" }
+
+    context "when deployment name and errand name is given" do
+      it "runs the errand" do
+        expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+          with("bosh --non-interactive -d #{deployment_name} run-errand #{errand_name}",
+               "Failed to run errand #{errand_name}").
+          and_return(nil)
+
+        expect(UnitTestsUtils::Bosh).to receive(:`).once.
+          with("bosh -d #{deployment_name} task > /dev/null 2>&1")
+
+        UnitTestsUtils::Bosh.run_errand(deployment_name, errand_name)
+      end
+    end
+  end
+
   describe ".create_and_upload_dev_release" do
     let(:base_dir) { './' }
     let(:release_path) { File.join(base_dir, 'dev_releases', release_name, "#{release_name}-#{release_version}.yml") }

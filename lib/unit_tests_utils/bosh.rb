@@ -41,6 +41,11 @@ module UnitTestsUtils::Bosh
     wait_for_task_to_finish(deployment_name)
   end
 
+  def self.run_errand(deployment_name, errand_name)
+    execute_or_raise_error("bosh --non-interactive -d #{deployment_name} run-errand #{errand_name}", "Failed to run errand #{errand_name}")
+    wait_for_task_to_finish(deployment_name)
+  end
+
   def self.create_and_upload_dev_release(base_dir, release_name, version_prefix = '')
     version = dev_release_version(version_prefix)
     raw_json = execute_or_raise_error("bosh --json create-release --dir #{base_dir} --name #{release_name} --version #{version} --force", "Creating release failed")
