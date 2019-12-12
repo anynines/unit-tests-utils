@@ -86,7 +86,7 @@ class UnitTestsUtils::Manifest
           if key == "jobs"
             value.each do |job|
               property = job.dig('properties')
-              merged_properties.merge!(property)
+              merged_properties.merge!(property || {})
             end
           end
         end
