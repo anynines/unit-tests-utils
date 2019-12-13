@@ -27,6 +27,18 @@ module UnitTestsUtils::Bosh
     wait_for_task_to_finish(deployment_name)
   end
 
+  def self.teardown_deployment(deployment_name)
+    return false if failed? && keep_alive?
+
+    delete_deployment(deployment_name)
+    yield(deployment_name) if block_given?
+
+    return true
+  rescue StandardError => e
+    set_failure
+    raise e
+  end
+
   def self.start_instance(deployment_name, instance_name, index = '0', debug = true)
     if debug
       execute_or_raise_error("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force", "Starting instance failed")
@@ -119,6 +131,10 @@ module UnitTestsUtils::Bosh
     execute_or_raise_error("bosh interpolate#{options.join(' ')} #{vars} #{manifest_path}", "Interpolate failed")
   end
 
+  def self.set_failure
+    ENV['UNIT_TEST_FAILED'] = "true"
+  end
+
   private
 
   def self.wait_for_task_to_finish(deployment_name)
@@ -165,6 +181,14 @@ module UnitTestsUtils::Bosh
       raise BoshError.new("#{msg} - exit_status: #{exit_status}\nstdout: #{stdout}\nstderr: #{stderr}")
     end
     return stdout
+  end
+
+  def self.keep_alive?
+    ENV['UNIT_TESTS_KEEP_ALIVE'].nil? || ENV['UNIT_TESTS_KEEP_ALIVE'] == "true"
+  end
+
+  def failed?
+    !ENV['UNIT_TEST_FAILED'].nil? && ENV['UNIT_TEST_FAILED'] == "true"
   end
 
   class BoshError < StandardError; end
