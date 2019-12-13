@@ -2,10 +2,12 @@ require 'json'
 require 'open3'
 
 module UnitTestsUtils::Bosh
-  def self.deploy(deployment_name, manifest_path, additional_vars = [])
+  def self.deploy(deployment_name, manifest_path, additional_vars = [], ops_files = [])
     vars = "-l #{ENV['PATH_TO_IAAS_CONFIG']}"
     vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
     additional_vars.each { |key, value| vars << " --var #{key}='#{value}'" }
+
+    ops_files.each { |file| vars << " --ops-file #{file}"}
 
     execute_or_raise_error("bosh --non-interactive -d #{deployment_name} deploy #{vars} #{manifest_path}", "Deploy failed")
     wait_for_task_to_finish(deployment_name)

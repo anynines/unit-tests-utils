@@ -24,7 +24,11 @@ describe UnitTestsUtils::Bosh do
     let(:path_to_creds) { './config.yml' }
     let(:path_to_iaas_config) { './iaas_config.yml' }
     let(:additional_vars) { { key1: 'value1', key2: 'value2' } }
+    let(:additional_ops_files) { ['ops-file-1', 'ops-file-2'] }
     let(:additional_vars_string) { additional_vars.map { |key, value| "--var #{key}='#{value}'" }.join(' ') }
+    let(:additional_ops_files_string) do
+      additional_ops_files.map { |file| "--ops-file #{file}" }.join(' ')
+    end
 
     before :each do
       expect(ENV).to receive(:[]).with('PATH_TO_IAAS_CONFIG').at_least(:once).
@@ -60,6 +64,22 @@ describe UnitTestsUtils::Bosh do
           UnitTestsUtils::Bosh.deploy(deployment_name, manifest_path, additional_vars)
         end
       end
+
+      context "when additional ops files are given" do
+        it "runs a bosh deployment" do
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh --non-interactive -d #{deployment_name} deploy " \
+                 "-l #{ENV['PATH_TO_IAAS_CONFIG']} -l #{ENV['PATH_TO_CREDS']} " \
+                 "#{additional_vars_string} #{additional_ops_files_string} #{manifest_path}",
+                 bosh_error_messages[:deploy]).
+            and_return(nil)
+          expect(UnitTestsUtils::Bosh).to receive(:`).once.
+            with("bosh -d #{deployment_name} task > /dev/null 2>&1")
+
+          UnitTestsUtils::Bosh.deploy(deployment_name, manifest_path,
+                                      additional_vars, additional_ops_files)
+        end
+      end
     end
 
     context "when the PATH_TO_CREDS env var is not set" do
@@ -89,6 +109,22 @@ describe UnitTestsUtils::Bosh do
             with("bosh -d #{deployment_name} task > /dev/null 2>&1")
 
           UnitTestsUtils::Bosh.deploy(deployment_name, manifest_path, additional_vars)
+        end
+      end
+
+      context "when additional ops files are given" do
+        it "runs a bosh deployment" do
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh --non-interactive -d #{deployment_name} deploy " \
+                 "-l #{ENV['PATH_TO_IAAS_CONFIG']} " \
+                 "#{additional_vars_string} #{additional_ops_files_string} #{manifest_path}",
+                 bosh_error_messages[:deploy]).
+            and_return(nil)
+          expect(UnitTestsUtils::Bosh).to receive(:`).once.
+            with("bosh -d #{deployment_name} task > /dev/null 2>&1")
+
+          UnitTestsUtils::Bosh.deploy(deployment_name, manifest_path,
+                                      additional_vars, additional_ops_files)
         end
       end
     end
