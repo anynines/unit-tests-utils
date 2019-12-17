@@ -1,6 +1,8 @@
 require 'yaml'
 
 class UnitTestsUtils::Manifest
+  autoload :Traversal, 'unit_tests_utils/traversal.rb'
+
   @@instances = {}
 
   attr_reader :path, :manifest, :additional_vars
@@ -78,21 +80,25 @@ class UnitTestsUtils::Manifest
     end
   end
 
-  def properties
-    {}.tap do |merged_properties|
-      instance_groups = manifest.dig('instance_groups')
-      instance_groups.each do |instance|
-        instance.each do |key,value|
-          if key == "jobs"
-            value.each do |job|
-              property = job.dig('properties')
-              merged_properties.merge!(property || {})
+  def properties(path = nil)
+    if !path.nil?
+      UnitTestsUtils::Manifest::Traversal.new(manifest).find(path)
+    else
+      {}.tap do |merged_properties|
+        instance_groups = manifest.dig('instance_groups')
+        instance_groups.each do |instance|
+          instance.each do |key,value|
+            if key == "jobs"
+              value.each do |job|
+                property = job.dig('properties')
+                merged_properties.merge!(property || {})
+              end
             end
           end
         end
-      end
 
-      merged_properties.merge!(manifest['properties'] || {})
+        merged_properties.merge!(manifest['properties'] || {})
+      end
     end
   end
 
