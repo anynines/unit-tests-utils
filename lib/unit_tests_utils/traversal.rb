@@ -36,6 +36,5 @@ class UnitTestsUtils::Manifest::Traversal
       end
     end
 
-    raise NotImplementedError
   end
 end
