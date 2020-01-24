@@ -8,4 +8,5 @@ module UnitTestsUtils
   autoload :PGWebServiceClient, 'unit_tests_utils/postgresql_web_service_client.rb'
   autoload :RspecLogger, 'unit_tests_utils/rspec_logger.rb'
   autoload :Turbulence, 'unit_tests_utils/turbulence.rb'
+  autoload :TemplateRender, 'unit_tests_utils/template_render.rb'
 end
