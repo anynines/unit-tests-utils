@@ -1,0 +1,4 @@
+---
+first_level:
+  first_entry: <%= first_var_content %>
+  second_entry: <%= second_var_content %>
