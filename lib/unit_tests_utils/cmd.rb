@@ -10,5 +10,23 @@ module UnitTestsUtils::Cmd
     return stdout, stderr
   end
 
+  def self.exec_with_retry(error_message, backoff: 5, retries: 1200)
+    counter = 0
+
+    while ! result = yield do
+      sleep(backoff)
+
+      puts "Attempt number #{counter} out of #{retries} retries"
+
+      if counter >= retries
+        raise CmdError.new(error_message)
+      end
+
+      counter += 1
+    end
+
+    return result
+  end   
+
   class CmdError < StandardError; end
 end
