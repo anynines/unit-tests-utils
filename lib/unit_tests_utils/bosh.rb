@@ -25,10 +25,21 @@ module UnitTestsUtils::Bosh
     wait_for_task_to_finish(deployment_name)
   end
 
+  # Recreates a deployment or an instance.
+  # https://bosh.io/docs/cli-v2#recreate
+  def self.recreate(deployment_name, options = nil, instance_name = nil, index = 0)
+    command = "bosh --non-interactive -d #{deployment_name} recreate"
+    command << " #{options}" if !options.nil?
+    command << " #{instance_name}/#{index}" if !instance_name.nil?
+
+    execute_or_raise_error(command, "Recreate failed")
+    wait_for_task_to_finish(deployment_name)
+  end
+
   def self.find_in_deployment_manifest(deployment_name, ops_search_path = '')
     manifest_as_str = execute_or_raise_error("bosh --non-interactive -d #{deployment_name} manifest", "Couldn't fetch deployment mainfest")
     manifest = YAML.load(manifest_as_str)
-    if ops_search_path.empty? 
+    if ops_search_path.empty?
       manifest
     else
       UnitTestsUtils::Manifest::Traversal.new(manifest).find(ops_search_path)
