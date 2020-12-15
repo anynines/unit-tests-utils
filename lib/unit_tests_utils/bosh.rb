@@ -42,14 +42,14 @@ module UnitTestsUtils::Bosh
 
   def self.start_instance(deployment_name, instance_name, index = '0', debug = true)
     if debug
-      execute_or_raise_error("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force", "Starting instance failed")
+      execute_or_raise_error("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index}", "Starting instance failed")
     else
-      execute_or_raise_error("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force > /dev/null 2> /dev/null", "Starting instance failed")
+      execute_or_raise_error("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} > /dev/null 2> /dev/null", "Starting instance failed")
     end
     wait_for_task_to_finish(deployment_name)
   end
 
-  def self.stop_instance(deployment_name, instance_name, index = '0', params = "--hard --force")
+  def self.stop_instance(deployment_name, instance_name, index = '0', params = "--hard --skip-drain")
     execute_or_raise_error("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} #{params}", "Stopping instance failed")
     wait_for_task_to_finish(deployment_name)
   end
