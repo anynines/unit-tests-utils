@@ -49,6 +49,10 @@ module UnitTestsUtils::Bosh
     wait_for_task_to_finish(deployment_name)
   end
 
+  # Stops a VM of a BOSH deployment. It'll cycle through all BOSH lifecycle hooks (Drain,
+  # Pre-start, Post-start, Post-deploy, Pre-stop, Post-stop) if no additional parameters (params)
+  # are provided.
+  # The corresponding documentation of the lifecycle hooks starts here: https://bosh.io/docs/drain
   def self.stop_instance(deployment_name, instance_name, index = '0', params = '')
     execute_or_raise_error("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} #{params}", "Stopping instance failed")
     wait_for_task_to_finish(deployment_name)
