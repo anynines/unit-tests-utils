@@ -28,7 +28,7 @@ module UnitTestsUtils::Bosh
   def self.find_in_deployment_manifest(deployment_name, ops_search_path = '')
     manifest_as_str = execute_or_raise_error("bosh --non-interactive -d #{deployment_name} manifest", "Couldn't fetch deployment mainfest")
     manifest = YAML.load(manifest_as_str)
-    if ops_search_path.empty? 
+    if ops_search_path.empty?
       manifest
     else
       UnitTestsUtils::Manifest::Traversal.new(manifest).find(ops_search_path)
@@ -49,7 +49,7 @@ module UnitTestsUtils::Bosh
     wait_for_task_to_finish(deployment_name)
   end
 
-  def self.stop_instance(deployment_name, instance_name, index = '0', params = "--hard --skip-drain")
+  def self.stop_instance(deployment_name, instance_name, index = '0', params = '')
     execute_or_raise_error("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} #{params}", "Stopping instance failed")
     wait_for_task_to_finish(deployment_name)
   end
