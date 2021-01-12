@@ -9,7 +9,7 @@ class UnitTestsUtils::Manifest::Traversal
     traverse(manifest, path)
   end
 
-  protected 
+  protected
 
   def traverse(manifest, path)
     first, *rest = path.split('/').reject { |e| e.to_s.empty? }
@@ -18,15 +18,15 @@ class UnitTestsUtils::Manifest::Traversal
     if rest == ""
       if first.include?('=')
         components = first.split('=')
-        found = manifest.find { |pair| pair[components.first] == components.last } 
+        found = manifest.find { |pair| pair[components.first] == components.last }
         return found
       end
       return manifest[first]
-    end  
+    end
 
     if first.include?('=')
       components = first.split('=')
-      found = manifest.find { |pair| pair[components.first] == components.last } 
+      found = manifest.find { |pair| pair[components.first] == components.last }
       return traverse(found, rest)
     end
 
