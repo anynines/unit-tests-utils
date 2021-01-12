@@ -13,7 +13,7 @@ describe UnitTestsUtils::Manifest::Traversal do
         path: '/a/b',
         expected: 2
       },
-      { 
+      {
         h: {'a' => [{'b' => 'value'}]},
         path: '/a/b=value',
         expected: {'b' => 'value'}
