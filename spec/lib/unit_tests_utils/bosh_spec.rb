@@ -146,7 +146,7 @@ describe UnitTestsUtils::Bosh do
       let(:index) { 1 }
       it "runs a bosh start on the given instance and index" do
         expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
-          with("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} --force", bosh_error_messages[:start])
+          with("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index}", bosh_error_messages[:start])
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
           with("bosh -d #{deployment_name} task > /dev/null 2>&1")
 
@@ -157,7 +157,7 @@ describe UnitTestsUtils::Bosh do
     context "when the index is not given" do
       it "runs a bosh start on the given instance with index 0" do
         expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
-          with("bosh --non-interactive -d #{deployment_name} start #{instance_name}/0 --force", bosh_error_messages[:start])
+          with("bosh --non-interactive -d #{deployment_name} start #{instance_name}/0", bosh_error_messages[:start])
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
           with("bosh -d #{deployment_name} task > /dev/null 2>&1")
 
@@ -171,7 +171,7 @@ describe UnitTestsUtils::Bosh do
       let(:index) { 1 }
       it "runs a bosh stop on the given instance and index" do
         expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
-          with("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} --hard --force", bosh_error_messages[:stop])
+          with("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index}", bosh_error_messages[:stop])
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
           with("bosh -d #{deployment_name} task > /dev/null 2>&1")
 
@@ -182,7 +182,7 @@ describe UnitTestsUtils::Bosh do
     context "when the index is not given" do
       it "runs a bosh stop on the given instance with index 0" do
         expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
-          with("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/0 --hard --force", bosh_error_messages[:stop])
+          with("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/0", bosh_error_messages[:stop])
         expect(UnitTestsUtils::Bosh).to receive(:`).once.
           with("bosh -d #{deployment_name} task > /dev/null 2>&1")
 
