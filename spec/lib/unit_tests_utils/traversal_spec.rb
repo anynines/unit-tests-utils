@@ -38,6 +38,16 @@ describe UnitTestsUtils::Manifest::Traversal do
         path: '/a/b=value/c/e=value',
         expected: { 'e' => 'value' }
       },
+      {
+        h: { 'a' => [ { 'b' => 'value', 'c' => { 'd' => 'e'} }, { 'n' => 'value' } ] },
+        path: '/a/b=value/c?/f?',
+        expected: nil
+      },
+      {
+        h: { 'a' => [ { 'b' => 'value', 'c' => { 'd' => 'e'} }, { 'n' => 'value' } ] },
+        path: '/a/b=value/c?',
+        expected: { 'd' => 'e' }
+      },
     ].each do |entry|
       it "Successful traversal of yaml objects using ops path syntax" do
         expect(UnitTestsUtils::Manifest::Traversal.new(entry[:h]).find(entry[:path])).to eql(entry[:expected])

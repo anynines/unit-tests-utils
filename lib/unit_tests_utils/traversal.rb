@@ -12,7 +12,8 @@ class UnitTestsUtils::Manifest::Traversal
   protected
 
   def traverse(manifest, path)
-    first, *rest = path.split('/').reject { |e| e.to_s.empty? }
+    raw_first, *rest = path.split('/').reject { |e| e.to_s.empty? }
+    first = formatted_key(raw_first)
     rest = rest.join('/')
 
     if rest == ""
@@ -36,6 +37,18 @@ class UnitTestsUtils::Manifest::Traversal
       end
     end
 
-    raise NotImplementedError
+    raise NotImplementedError if !is_optional(first)
+  end
+
+  private
+
+  def is_optional(key)
+    key.end_with?('?')
+  end
+
+  def formatted_key(key)
+    return key.chop if is_optional(key)
+
+    key
   end
 end
