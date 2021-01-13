@@ -45,6 +45,11 @@ describe UnitTestsUtils::Manifest::Traversal do
       },
       {
         h: { 'a' => [ { 'b' => 'value', 'c' => { 'd' => 'e'} }, { 'n' => 'value' } ] },
+        path: '/a/b=value/c?/f?/g?',
+        expected: nil
+      },
+      {
+        h: { 'a' => [ { 'b' => 'value', 'c' => { 'd' => 'e'} }, { 'n' => 'value' } ] },
         path: '/a/b=value/c?',
         expected: { 'd' => 'e' }
       },

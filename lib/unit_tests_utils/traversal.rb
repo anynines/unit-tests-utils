@@ -37,7 +37,7 @@ class UnitTestsUtils::Manifest::Traversal
       end
     end
 
-    raise NotImplementedError if !is_optional(first)
+    raise NotImplementedError if !is_optional(raw_first)
   end
 
   private
