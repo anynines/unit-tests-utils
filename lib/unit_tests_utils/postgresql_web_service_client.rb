@@ -1,9 +1,15 @@
 require 'httparty'
+require_relative 'postgresql_client'
 
 class UnitTestsUtils::PGWebServiceClient
-  attr_reader :manifest
+  attr_reader :manifest, :manifest_name, :password
 
-  def initialize(manifest)
+  DEFAULT_WEB_SERVICE_PASSWORD = 'password'
+
+  def initialize(manifest, options = {})
+    @manifest_name = options[:new_manifest_name] || manifest.name
+    @password = options[:pg_web_service_password] || DEFAULT_WEB_SERVICE_PASSWORD
+
     @manifest = manifest
   end
 
@@ -12,7 +18,7 @@ class UnitTestsUtils::PGWebServiceClient
   end
 
   def node_ips
-    instances = UnitTestsUtils::Bosh.instance_status(manifest.name, manifest.instance_names.first)
+    instances = UnitTestsUtils::Bosh.instance_status(manifest_name, manifest.instance_names.first)
     instances.map { |instance| instance["ips"] }
   end
 
@@ -147,7 +153,7 @@ class UnitTestsUtils::PGWebServiceClient
     standby_nodes = cluster_nodes.select { |node| node["data"]["pg_mode"] == "standby" }
 
     standby_nodes.each do |node|
-      pg_client = PostgreSQLClient.create_from_manifest(manifest, node["data"]["node"]["ip"])
+      pg_client = UnitTestsUtils::PostgreSQLClient.create_from_manifest(manifest, node["data"]["node"]["ip"])
       begin
         if pg_client.ping > 0
 
@@ -178,13 +184,13 @@ class UnitTestsUtils::PGWebServiceClient
 
     host = master_ip
     logger.debug("Checking if cluster has replicated the data - host: #{host}")
-    pg_client = PostgreSQLClient.create_from_manifest(manifest, host)
+    pg_client = UnitTestsUtils::PostgreSQLClient.create_from_manifest(manifest, host)
     res = pg_client.execute("SELECT pg_current_wal_lsn();", { dbname: "postgres" })
 
     master_lsn = lsn_to_i(res.values.flatten.first)
 
     standby_ips.each do |node|
-      pg_client = PostgreSQLClient.create_from_manifest(manifest, node)
+      pg_client = UnitTestsUtils::PostgreSQLClient.create_from_manifest(manifest, node)
       res = pg_client.execute("SELECT pg_last_wal_receive_lsn();", { dbname: "postgres" })
 
       standby_lsn = lsn_to_i(res.values.flatten.first)
@@ -278,11 +284,21 @@ class UnitTestsUtils::PGWebServiceClient
     nodes.select { |node| node != nil }
   end
 
+  def is_cluster_ready
+    logger.debug("Getting cluster status...")
+    nodes_status = cluster_status
+    logger.debug("Cluster status: #{nodes_status}")
+    nodes = nodes_status.select { |node_status| node_status["status"] == "succeeded" && node_status["data"]["status"] == "running" }
+
+    return nodes.length == nodes_status.length && has_a_master(nodes_status)
+  end
+
   private
+
   def webservice_credentials
     {
       :username => "admin",
-      :password => "password"
+      :password => password
     }
   end
 
@@ -295,15 +311,6 @@ class UnitTestsUtils::PGWebServiceClient
       node["data"]["master_in_majority_partition"] == true
     end
     return masters.length > 0
-  end
-
-  def is_cluster_ready
-    logger.debug("Getting cluster status...")
-    nodes_status = cluster_status
-    logger.debug("Cluster status: #{nodes_status}")
-    nodes = nodes_status.select { |node_status| node_status["status"] == "succeeded" && node_status["data"]["status"] == "running" }
-
-    return nodes.length == nodes_status.length && has_a_master(nodes_status)
   end
 
   def lsn_to_i(lsn)
