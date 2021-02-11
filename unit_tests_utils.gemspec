@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
     'lib/unit_tests_utils/internal_dns.rb',
     'lib/unit_tests_utils/manifest.rb',
     'lib/unit_tests_utils/postgresql_web_service_client.rb',
+    'lib/unit_tests_utils/cred_hub.rb',
     'lib/unit_tests_utils/turbulence.rb',
   ]
   s.homepage    = 'http://www.anynines.com/'
