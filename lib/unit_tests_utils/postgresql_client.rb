@@ -1,9 +1,11 @@
 require 'pg'
+require 'securerandom'
 
 class UnitTestsUtils::PostgreSQLClient
   attr_reader :args
 
   POSTGRESQL_PROPERTIES_PATH = '/instance_groups/name=pg/jobs/name=postgresql-ha/properties'
+  TEST_TABLE = 'a9s_pg_tests'.freeze
 
   def initialize(args)
     @args = args
@@ -25,6 +27,27 @@ class UnitTestsUtils::PostgreSQLClient
   def ping
     logger.debug("* Creating ping with args: *#{args}*")
     return PG::Connection.ping(args)
+  end
+
+  def create_table
+    execute("CREATE TABLE IF NOT EXISTS #{TEST_TABLE} (test_key TEXT PRIMARY KEY NOT NULL, " \
+            "test_value TEXT NOT NULL)")
+  end
+
+  def generate_data
+    {'test_key' => "#{SecureRandom.uuid}", 'test_value' => "#{SecureRandom.uuid}"}
+  end
+
+  def insert(data)
+    execute("INSERT INTO #{TEST_TABLE} VALUES ('#{data['test_key']}', '#{data['test_value']}')")
+  end
+
+  def replication_slots
+    execute('SELECT * FROM pg_replication_slots;')
+  end
+
+  def select(key, args = {})
+    execute("SELECT test_key, test_value FROM #{TEST_TABLE} WHERE test_key = '#{key}'", args)
   end
 
   def connect(extra_args = {})
