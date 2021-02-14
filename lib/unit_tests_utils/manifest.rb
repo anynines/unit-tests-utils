@@ -31,9 +31,9 @@ class UnitTestsUtils::Manifest
     end
   end
 
-  def initialize(manifest_path, additional_vars = {})
+  def initialize(manifest_path, additional_vars = {}, ops_files = [])
     @path = manifest_path
-    interpolated_manifest = UnitTestsUtils::Bosh.interpolate(manifest_path, additional_vars)
+    interpolated_manifest = UnitTestsUtils::Bosh.interpolate(manifest_path, additional_vars, false, ops_files)
     @manifest = YAML.load(interpolated_manifest)
     @additional_vars = Hash[additional_vars.map { |key, value| [key.to_sym, value] }]
   end

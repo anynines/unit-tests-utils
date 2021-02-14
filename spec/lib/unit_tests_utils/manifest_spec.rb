@@ -112,6 +112,25 @@ describe UnitTestsUtils::Manifest do
           expect(manifest_with_additional_vars.additional_vars).to eq manifest_additional_vars
         end
       end
+
+      context 'when ops files are given' do
+        let(:ops_files) { [Fixtures.file_path("change-name-ops.yml")] }
+        let(:new_name) { 'newdummyname' }
+
+        let(:manifest_yaml_with_ops) {
+          interpolated_manifest = UnitTestsUtils::Bosh.interpolate(manifest_path, manifest_additional_vars, false, ops_files)
+          YAML.load(interpolated_manifest)
+        }
+
+        it 'updates the name of the manifest' do
+          manifest_with_additional_vars = UnitTestsUtils::Manifest.new(manifest_path, manifest_additional_vars, ops_files)
+          puts manifest_with_additional_vars.manifest
+
+          expect(manifest_with_additional_vars.path).to eq manifest_path
+          expect(manifest_with_additional_vars.name).to eq new_name
+          expect(manifest_with_additional_vars.manifest).to eq manifest_yaml_with_ops
+        end
+      end
     end
   end
 
