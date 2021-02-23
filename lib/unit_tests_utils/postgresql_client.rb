@@ -44,8 +44,16 @@ class UnitTestsUtils::PostgreSQLClient
     {'test_key' => "#{SecureRandom.uuid}", 'test_value' => "#{SecureRandom.uuid}"}
   end
 
+  def truncate(table = TEST_TABLE)
+    execute("TRUNCATE TABLE #{table}")
+  end
+
   def insert(data)
     execute("INSERT INTO #{TEST_TABLE} VALUES ('#{data['test_key']}', '#{data['test_value']}')")
+  end
+
+  def update(data)
+    execute("UPDATE #{TEST_TABLE} SET test_value = '#{data['test_value']}' WHERE test_key='#{data['test_key']}'")
   end
 
   def replication_slots
