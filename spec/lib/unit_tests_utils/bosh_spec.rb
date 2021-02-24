@@ -320,6 +320,19 @@ describe UnitTestsUtils::Bosh do
           UnitTestsUtils::Bosh.interpolate(manifest_path, additional_vars)
         end
       end
+
+      context 'when additional ops-files are given' do
+        let(:ops_files) { ['/tmp/dummy-ops.yml', '/tmp/dummy-ops-2.yml'] }
+        let(:ops_files_string) { ops_files.map { |file| "--ops-file #{file}" }.join(' ') }
+
+        it "interpolates a deployment manifest" do
+          expect(UnitTestsUtils::Bosh).to receive(:execute_or_raise_error).once.
+            with("bosh interpolate -l #{ENV['PATH_TO_IAAS_CONFIG']} -l #{ENV['PATH_TO_CREDS']} " \
+                 "#{additional_vars_string} #{ops_files_string} #{manifest_path}", bosh_error_messages[:interpolate])
+
+          UnitTestsUtils::Bosh.interpolate(manifest_path, additional_vars, false, ops_files)
+        end
+      end
     end
 
     context "when the PATH_TO_CREDS env var is not set" do
