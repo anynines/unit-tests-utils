@@ -8,11 +8,12 @@ Gem::Specification.new do |s|
   s.description = 'This gems includes all resources needed for the a9s BOSH release unit tests.'
   s.authors     = ['Michael Lieser', 'Dennis Groß', 'Lucas Pinto', 'Kevin Konrad',
                     'Jens Breuer', 'Khaled Blah', 'Morgan Hill', 'Thomas Bruckmann',
-                    'Robert Gogolok', 'Heitor Meira', 'Cedrik Heusser']
+                    'Robert Gogolok', 'Heitor Meira', 'Cedrik Heusser', 'Francisco Germano']
   s.email       = 'support@anynines.com'
   s.files       = [
     'lib/unit_tests_utils.rb',
     'lib/unit_tests_utils/bosh.rb',
+    'lib/unit_tests_utils/credhub.rb',
     'lib/unit_tests_utils/consul.rb',
     'lib/unit_tests_utils/git.rb',
     'lib/unit_tests_utils/internal_dns.rb',
