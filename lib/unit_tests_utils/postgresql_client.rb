@@ -13,15 +13,16 @@ class UnitTestsUtils::PostgreSQLClient
     @args[:sslmode] ||= 'disable'
   end
 
-  def self.create_from_manifest(manifest, host = nil)
-    host = manifest.hostname unless host
-    user = manifest.properties['postgresql-ha']['admin_credentials']['username']
-    password = manifest.properties['postgresql-ha']['admin_credentials']['password']
+  def self.create_from_manifest(manifest, args = {})
+    args[:host] ||= manifest.hostname
+    args[:user] ||= manifest.properties['postgresql-ha']['admin_credentials']['username']
+    args[:password] ||= manifest.properties['postgresql-ha']['admin_credentials']['password']
+
     if manifest.properties("#{POSTGRESQL_PROPERTIES_PATH}/postgresql-ha/ssl?/enable")
-      sslmode = "require"
+      args[:sslmode] = "require"
     end
 
-    self.new(host: host, user: user, password: password, sslmode: sslmode)
+    self.new(args)
   end
 
   def ping

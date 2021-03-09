@@ -153,7 +153,7 @@ class UnitTestsUtils::PGWebServiceClient
     standby_nodes = cluster_nodes.select { |node| node["data"]["pg_mode"] == "standby" }
 
     standby_nodes.each do |node|
-      pg_client = UnitTestsUtils::PostgreSQLClient.create_from_manifest(manifest, node["data"]["node"]["ip"])
+      pg_client = UnitTestsUtils::PostgreSQLClient.create_from_manifest(manifest, { host: node["data"]["node"]["ip"] })
       begin
         if pg_client.ping > 0
 
@@ -184,13 +184,13 @@ class UnitTestsUtils::PGWebServiceClient
 
     host = master_ip
     logger.debug("Checking if cluster has replicated the data - host: #{host}")
-    pg_client = UnitTestsUtils::PostgreSQLClient.create_from_manifest(manifest, host)
+    pg_client = UnitTestsUtils::PostgreSQLClient.create_from_manifest(manifest, { host: host })
     res = pg_client.execute("SELECT pg_current_wal_lsn();", { dbname: "postgres" })
 
     master_lsn = lsn_to_i(res.values.flatten.first)
 
     standby_ips.each do |node|
-      pg_client = UnitTestsUtils::PostgreSQLClient.create_from_manifest(manifest, node)
+      pg_client = UnitTestsUtils::PostgreSQLClient.create_from_manifest(manifest, { host: node })
       res = pg_client.execute("SELECT pg_last_wal_receive_lsn();", { dbname: "postgres" })
 
       standby_lsn = lsn_to_i(res.values.flatten.first)

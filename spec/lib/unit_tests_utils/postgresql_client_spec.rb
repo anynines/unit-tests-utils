@@ -56,7 +56,7 @@ describe UnitTestsUtils::PostgreSQLClient do
   end
 
   describe '#select' do
-    let(:data) { client.generate_data }
+    let(:test_key) { 'dummy_key' }
 
     context 'when no args are given' do
       it 'selects with default args' do
