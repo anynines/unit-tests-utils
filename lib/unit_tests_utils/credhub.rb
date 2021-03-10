@@ -7,7 +7,8 @@ class UnitTestsUtils::CredHub
   COMMAND_FAIL_PREFIX_MESSAGE = 'CredHub command failed:'
 
   def self.get_by_name(name)
-    execute(GET_COMMAND, "--name='#{name}'")
+    stdout, stderr = execute(GET_COMMAND, "--name='#{name}'")
+    return JSON.parse(stdout), stderr
   end
 
   private
