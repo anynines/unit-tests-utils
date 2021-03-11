@@ -10,7 +10,7 @@ describe UnitTestsUtils::CredHub do
       msg_expected = "#{UnitTestsUtils::CredHub::COMMAND_FAIL_PREFIX_MESSAGE} #{command_expected}"
       allow(UnitTestsUtils::Cmd).to receive(:exec)
         .with(command_expected, msg_expected)
-        .and_return({})
+        .and_return('{}')
 
       get_by_name
     end
