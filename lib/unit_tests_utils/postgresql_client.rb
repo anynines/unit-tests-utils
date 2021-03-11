@@ -25,9 +25,14 @@ class UnitTestsUtils::PostgreSQLClient
     self.new(args)
   end
 
-  def ping
-    logger.debug("* Creating ping with args: *#{args}*")
-    return PG::Connection.ping(args)
+  def ping(extra_args = {})
+    ping_args = args.merge(extra_args)
+    logger.debug("* Creating ping with args: *#{ping_args}*")
+    return PG::Connection.ping(ping_args)
+  end
+
+  def drop_table
+    execute("DROP TABLE IF EXISTS #{TEST_TABLE}")
   end
 
   def create_table
@@ -51,10 +56,30 @@ class UnitTestsUtils::PostgreSQLClient
     execute("SELECT test_key, test_value FROM #{TEST_TABLE} WHERE test_key = '#{data['test_key']}'", args)
   end
 
+  def max_connections
+    execute('SHOW max_connections')[0]['max_connections'].to_i
+  end
+
+  def data_checksums?
+    execute('SHOW data_checksums')[0]['data_checksums'] == 'on'
+  end
+
+  def database(database_name)
+    execute("SELECT 1 FROM pg_database WHERE datname = '#{database_name}'").map { |database| database['datname'] }
+  end
+
+  def work_mem
+    execute('SHOW work_mem')[0]['work_mem'].to_i
+  end
+
+  def extensions
+    execute('SELECT extname FROM pg_extension').map { |extension| extension['extname'] }
+  end
+
   def connect(extra_args = {})
-    args.merge!(extra_args)
-    logger.debug("* Creating connection with args: *#{args}*")
-    return PG::Connection.new(args)
+    connect_args = args.merge(extra_args)
+    logger.debug("* Creating connection with args: *#{connect_args}*")
+    return PG::Connection.new(connect_args)
   end
 
   def execute(sql, args = {})
