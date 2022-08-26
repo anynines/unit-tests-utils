@@ -91,13 +91,13 @@ class UnitTestsUtils::Manifest
             if key == "jobs"
               value.each do |job|
                 property = job.dig('properties')
-                merged_properties.merge!(property || {})
+                deep_merge!(merged_properties, (property || {}))
               end
             end
           end
         end
 
-        merged_properties.merge!(manifest['properties'] || {})
+        deep_merge!(merged_properties, (manifest['properties'] || {}))
       end
     end
   end
@@ -131,5 +131,21 @@ class UnitTestsUtils::Manifest
     manifest['instance_groups']
       .select { |instance_group| instance_group['name'] == instance_name }
       .first
+  end
+
+  private
+
+  def deep_merge!(this_hash, other_hash, &block)
+    this_hash.merge!(other_hash) do |_, this_val, other_val|
+      if this_val.is_a?(Hash) && other_val.is_a?(Hash)
+        deep_merge(this_val, other_val, &block)
+      else
+        other_val
+      end
+    end
+  end
+
+  def deep_merge(this_hash, other_hash, &block)
+    deep_merge!(this_hash.dup, other_hash, &block)
   end
 end
