@@ -50,6 +50,3 @@ DEPENDENCIES
   pg (= 0.19)
   rspec
   rubocop
-
-BUNDLED WITH
-   1.17.2
