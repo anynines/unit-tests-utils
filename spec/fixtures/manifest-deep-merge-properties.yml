@@ -1,0 +1,18 @@
+---
+name: service-ha
+
+instance_groups:
+- name: os
+  jobs:
+    - name: job0
+      properties:
+        opensearch:
+          admin:
+            username: username0
+            password: password0
+- name: dashboard
+  jobs:
+    - name: job1
+      properties:
+        opensearch:
+          cluster_name: some-cluster

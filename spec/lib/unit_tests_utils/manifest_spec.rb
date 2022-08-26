@@ -230,6 +230,15 @@ describe UnitTestsUtils::Manifest do
         expect(manifest.properties).to eq manifest_properties
       end
     end
+
+    context 'duplicate keys' do
+      let(:manifest_path) { Fixtures.file_path("manifest-deep-merge-properties.yml") }
+      let(:manifest_propertes) { {'opensearch' => { 'admin' => { 'username' => 'username0', 'password' => 'password0' }, 'cluster_name' => 'some-cluster' } } }
+
+      it 'merges all local properties' do
+        expect(manifest.properties). to eq manifest_propertes
+      end
+    end
   end
 
   describe "#get_network" do
