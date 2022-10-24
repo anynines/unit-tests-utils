@@ -4,3 +4,5 @@ updates:
     vendor: true
     directory: "/"
     open-pull-requests-limit: 0
+    schedule:
+      interval: weekly
