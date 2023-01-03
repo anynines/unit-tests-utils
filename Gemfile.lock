@@ -4,8 +4,10 @@ GEM
     ast (2.4.2)
     destructor (0.1.0)
     diff-lcs (1.4.4)
-    httparty (0.15.6)
+    httparty (0.21.0)
+      mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
+    mini_mime (1.1.2)
     multi_xml (0.6.0)
     parallel (1.20.1)
     parser (3.0.0.0)
@@ -46,7 +48,7 @@ PLATFORMS
 
 DEPENDENCIES
   destructor
-  httparty (= 0.15.6)
+  httparty (= 0.21.0)
   pg (= 0.19)
   rspec
   rubocop
