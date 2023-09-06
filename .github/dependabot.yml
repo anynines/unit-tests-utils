@@ -3,6 +3,22 @@ updates:
   - package-ecosystem: "bundler"
     vendor: true
     directory: "/"
-    open-pull-requests-limit: 0
+    open-pull-requests-limit: 5
     schedule:
       interval: weekly
+      time: "04:00"
+      day: "monday"
+      timezone: "Europe/Berlin"
+    labels:
+      - "unit-test"
+    groups:
+      all_dependencies:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "openssl"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "redis"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "puma"
+        update-types: ["version-update:semver-major"]
