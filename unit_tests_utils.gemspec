@@ -25,5 +25,5 @@ Gem::Specification.new do |s|
   s.license     = 'Nonstandard'
 
   s.add_runtime_dependency 'httparty', '0.21.0'
-  s.add_runtime_dependency 'pg', '0.21.0'
+  s.add_runtime_dependency 'pg', '1.5.4'
 end
