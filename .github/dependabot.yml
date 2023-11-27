@@ -3,7 +3,8 @@ updates:
   - package-ecosystem: "bundler"
     vendor: true
     directory: "/"
-    open-pull-requests-limit: 5
+    # Disable version updates, only security updates
+    open-pull-requests-limit: 0
     schedule:
       interval: weekly
       time: "04:00"
@@ -11,6 +12,8 @@ updates:
       timezone: "Europe/Berlin"
     labels:
       - "unit-test"
+      - "cve"
+      - "dependabot"
     groups:
       all_dependencies:
         patterns:
