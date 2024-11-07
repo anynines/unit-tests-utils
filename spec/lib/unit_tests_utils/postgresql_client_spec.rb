@@ -27,20 +27,22 @@ describe UnitTestsUtils::PostgreSQLClient do
 
   describe '#drop_table' do
     it 'drops a table if it exists' do
+      result_double = instance_double(PG::Result)
       expect(client).to receive(:execute).
-        with("DROP TABLE IF EXISTS #{test_table}").and_return(PG::Result.new()).once
+        with("DROP TABLE IF EXISTS #{test_table}").and_return(result_double).once
 
-      expect(client.drop_table).to be_a(PG::Result)
+      expect(client.drop_table).to be(result_double)
       end
   end
 
   describe '#create_table' do
     it 'creates a table with the default name' do
+      result_double = instance_double(PG::Result)
       expect(client).to receive(:execute).
         with("CREATE TABLE IF NOT EXISTS #{test_table} (test_key TEXT PRIMARY KEY NOT NULL, " \
-           "test_value TEXT NOT NULL)").and_return(PG::Result.new()).once
+           "test_value TEXT NOT NULL)").and_return(result_double).once
 
-      expect(client.create_table).to be_a(PG::Result)
+      expect(client.create_table).to be(result_double)
       end
   end
 
@@ -56,9 +58,10 @@ describe UnitTestsUtils::PostgreSQLClient do
     let(:data) { { 'test_key' => 'dummy_key', 'test_value' => 'dummy_value'} }
 
     it 'executes create table if not exists and inserts data' do
+      result_double = instance_double(PG::Result)
       expect(client).to receive(:execute).
         with("INSERT INTO #{test_table} VALUES ('#{data['test_key']}', '#{data['test_value']}')").
-        and_return(PG::Result.new()).once
+        and_return(result_double).once
 
       expect(client.insert(data)).to_not be_nil
     end
@@ -70,9 +73,10 @@ describe UnitTestsUtils::PostgreSQLClient do
 
     context 'when no args are given' do
       it 'selects with default args' do
+        result_double = instance_double(PG::Result)
         expect(client).to receive(:execute).
           with("SELECT test_key, test_value FROM #{test_table} WHERE test_key = '#{data['test_key']}'", {}).
-          and_return(PG::Result.new()).once
+          and_return(result_double).once
 
         expect(client.select(data)).to_not be_nil
       end
@@ -82,9 +86,10 @@ describe UnitTestsUtils::PostgreSQLClient do
       let(:args) { { host: 'other_dummy_host' } }
 
       it 'passes the args to the client' do
+        result_double = instance_double(PG::Result)
         expect(client).to receive(:execute).
           with("SELECT test_key, test_value FROM #{test_table} WHERE test_key = '#{data['test_key']}'", args).
-          and_return(PG::Result.new()).once
+          and_return(result_double).once
 
         expect(client.select(data, args)).to_not be_nil
       end
@@ -93,9 +98,10 @@ describe UnitTestsUtils::PostgreSQLClient do
 
   describe '#replication_slots' do
     it 'lists the replication slots' do
+      result_double = instance_double(PG::Result)
       expect(client).to receive(:execute).
         with('SELECT * FROM pg_replication_slots;').
-        and_return(PG::Result.new()).once
+        and_return(result_double).once
 
       expect(client.replication_slots).to_not be_nil
     end

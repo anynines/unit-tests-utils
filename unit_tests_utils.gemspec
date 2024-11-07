@@ -24,6 +24,6 @@ Gem::Specification.new do |s|
   s.homepage    = 'http://www.anynines.com/'
   s.license     = 'Nonstandard'
 
-  s.add_runtime_dependency 'httparty', '0.21.0'
-  s.add_runtime_dependency 'pg', '0.21.0'
+  s.add_runtime_dependency 'httparty', '0.22.0'
+  s.add_runtime_dependency 'pg', '1.5.9'
 end
