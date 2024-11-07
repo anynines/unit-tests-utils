@@ -20,7 +20,7 @@ class UnitTestsUtils::TemplateRender
   def save(dst_file, vars = {})
     rendered_content = render(vars)
 
-    File.open(dst_file, "w") { |f| f.write(rendered_content) }
+    File.open(dst_file, 'w') { |f| f.write(rendered_content) }
   end
 
   private

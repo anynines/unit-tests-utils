@@ -8,9 +8,12 @@ module UnitTestsUtils::Bosh
     vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
     additional_vars.each { |key, value| vars << " --var #{key}='#{value}'" }
 
-    ops_files.each { |file| vars << " --ops-file #{file}"}
+    ops_files.each { |file| vars << " --ops-file #{file}" }
 
-    execute_or_raise_error("bosh --non-interactive -d #{deployment_name} deploy #{vars} #{manifest_path}", "Deploy failed")
+    execute_or_raise_error(
+      "bosh --non-interactive -d #{deployment_name} deploy #{vars} #{manifest_path}",
+      'Deploy failed'
+    )
     wait_for_task_to_finish(deployment_name)
   end
 
@@ -21,12 +24,19 @@ module UnitTestsUtils::Bosh
     vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
     additional_vars.each { |key, value| vars << " --var #{key}='#{value}'" }
 
-    execute_or_raise_error_in("bosh --non-interactive -d #{deployment_name} deploy #{vars}", manifest.manifest.to_yaml, "Deploy failed")
+    execute_or_raise_error_in(
+      "bosh --non-interactive -d #{deployment_name} deploy #{vars}",
+      manifest.manifest.to_yaml,
+      'Deploy failed'
+    )
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.find_in_deployment_manifest(deployment_name, ops_search_path = '')
-    manifest_as_str = execute_or_raise_error("bosh --non-interactive -d #{deployment_name} manifest", "Couldn't fetch deployment mainfest")
+    manifest_as_str = execute_or_raise_error(
+      "bosh --non-interactive -d #{deployment_name} manifest",
+      "Couldn't fetch deployment mainfest"
+    )
     manifest = YAML.load(manifest_as_str)
     if ops_search_path.empty?
       manifest
@@ -36,15 +46,23 @@ module UnitTestsUtils::Bosh
   end
 
   def self.delete_deployment(deployment_name)
-    execute_or_raise_error("bosh --non-interactive -d #{deployment_name} delete-deployment --force", "Delete deployment failed")
+    execute_or_raise_error(
+      "bosh --non-interactive -d #{deployment_name} delete-deployment --force",
+      'Delete deployment failed'
+    )
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.start_instance(deployment_name, instance_name, index = '0', debug = true)
     if debug
-      execute_or_raise_error("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index}", "Starting instance failed")
+      execute_or_raise_error(
+        "bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index}",
+        'Starting instance failed'
+      )
     else
-      execute_or_raise_error("bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} > /dev/null 2> /dev/null", "Starting instance failed")
+      execute_or_raise_error(
+        "bosh --non-interactive -d #{deployment_name} start #{instance_name}/#{index} > /dev/null 2> /dev/null", 'Starting instance failed'
+      )
     end
     wait_for_task_to_finish(deployment_name)
   end
@@ -54,49 +72,62 @@ module UnitTestsUtils::Bosh
   # are provided.
   # The corresponding documentation of the lifecycle hooks starts here: https://bosh.io/docs/drain
   def self.stop_instance(deployment_name, instance_name, index = '0', params = '')
-    execute_or_raise_error("bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} #{params}".strip, "Stopping instance failed")
+    execute_or_raise_error(
+      "bosh --non-interactive -d #{deployment_name} stop #{instance_name}/#{index} #{params}".strip, 'Stopping instance failed'
+    )
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.run_errand(deployment_name, errand_name)
-    execute_or_raise_error("bosh --non-interactive -d #{deployment_name} run-errand #{errand_name}", "Failed to run errand #{errand_name}")
+    execute_or_raise_error(
+      "bosh --non-interactive -d #{deployment_name} run-errand #{errand_name}",
+      "Failed to run errand #{errand_name}"
+    )
     wait_for_task_to_finish(deployment_name)
   end
 
   def self.create_and_upload_dev_release(base_dir, release_name, version_prefix = '')
     version = dev_release_version(version_prefix)
-    raw_json = execute_or_raise_error("bosh --json create-release --dir #{base_dir} --name #{release_name} --version #{version} --force", "Creating release failed")
+    raw_json = execute_or_raise_error(
+      "bosh --json create-release --dir #{base_dir} --name #{release_name} --version #{version} --force", 'Creating release failed'
+    )
     metadata = parse_json_from_create_release(raw_json)
 
     release_name = "#{metadata[:unit_test_release_name]}-#{metadata[:unit_test_release_version]}.yml"
     release_path = File.join(base_dir, 'dev_releases', metadata[:unit_test_release_name], release_name)
-    execute_or_raise_error("bosh upload-release --dir #{base_dir} #{release_path}", "Uploading release failed")
+    execute_or_raise_error("bosh upload-release --dir #{base_dir} #{release_path}", 'Uploading release failed')
     metadata
   end
 
   def self.instance_status(deployment_name, instance_name, index = nil)
-    output = execute_or_raise_error("bosh --non-interactive -d #{deployment_name} instances --details --json", "Instance status failed")
+    output = execute_or_raise_error(
+      "bosh --non-interactive -d #{deployment_name} instances --details --json",
+      'Instance status failed'
+    )
     json = JSON.parse(output)
 
-    raise Exception.new("Could not find 'Tables'. Maybe this is a request timeout.") if json['Tables'].nil?
+    raise BoshError, "Could not find 'Tables'. Maybe this is a request timeout." if json['Tables'].nil?
 
     rows = json['Tables'].first.select { |table| table == 'Rows' }
     rows['Rows'].select do |vm|
       vm['instance'].split('/')[0] == instance_name and
-      (index.nil? or vm['index'] == index)
+        (index.nil? or vm['index'] == index)
     end
   end
 
   def self.delete_release(release_name, release_version = nil)
     release_name << "/#{release_version}" unless release_version.nil?
 
-    execute_or_raise_error("bosh --non-interactive delete-release #{release_name}", "Delete release failed")
+    execute_or_raise_error("bosh --non-interactive delete-release #{release_name}", 'Delete release failed')
   end
 
   def self.ssh(deployment_name, command, instance_name = nil, index = '0')
     if instance_name
 
-      execute_or_raise_error("bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c '#{command}'", "Cannot execute command #{command}")
+      execute_or_raise_error(
+        "bosh -d #{deployment_name} ssh #{instance_name}/#{index} -c '#{command}'",
+        "Cannot execute command #{command}"
+      )
     else
       execute_or_raise_error("bosh -d #{deployment_name} ssh -c '#{command}'", "Cannot execute command #{command}")
     end
@@ -105,24 +136,34 @@ module UnitTestsUtils::Bosh
   # returns an array of json object containing all the information about the instances
   # HINT: Consul DNS Name does only conatain hostpart!
   def self.get_deployment_info(deployment_name)
-    raw_json = execute_or_raise_error("bosh --non-interactive -d #{deployment_name} instances --json -i", "Cannot generate JSON with instances information")
+    raw_json = execute_or_raise_error(
+      "bosh --non-interactive -d #{deployment_name} instances --json -i",
+      'Cannot generate JSON with instances information'
+    )
     json = JSON.parse(raw_json)
 
-    result = Array.new
+    result = []
     json['Tables'].first['Rows'].each do |row|
-      instancegroupname = row['instance'].split("/")[0]
-      id = row['instance'].split("/")[1]
-      result << { "instancegroupname" => instancegroupname, "id" => id, "index" => row["index"], "ip" => row["ips"], "cid" => row["vm_cid"], "az" => row["az"], "consuldnsname" => "#{deployment_name}-#{instancegroupname}-#{row["index"]}", "bootstrap" => row["bootstrap"] }
+      instancegroupname = row['instance'].split('/')[0]
+      id = row['instance'].split('/')[1]
+      result << {
+        'instancegroupname' => instancegroupname,
+        'id' => id,
+        'index' => row['index'],
+        'ip' => row['ips'],
+        'cid' => row['vm_cid'],
+        'az' => row['az'],
+        'consuldnsname' => "#{deployment_name}-#{instancegroupname}-#{row['index']}",
+        'bootstrap' => row['bootstrap']
+      }
     end
-    return result
+    result
   end
 
   def get_id_for_index(deployment_name, instancename, jobindex)
     deployment_info = get_deployment_info(deployment_name)
     deployment_info.each do |instance|
-      if instance['instancegroupname'] == instancename && instance['index'] == jobindex
-        return instance['id']
-      end
+      return instance['id'] if instance['instancegroupname'] == instancename && instance['index'] == jobindex
     end
   end
 
@@ -134,17 +175,15 @@ module UnitTestsUtils::Bosh
     ops_files.each { |file| vars << " --ops-file #{file}" }
     vars << ' --var-errs' if vars_errs
 
-    execute_or_raise_error("bosh interpolate #{vars} #{manifest_path}", "Interpolate failed")
+    execute_or_raise_error("bosh interpolate #{vars} #{manifest_path}", 'Interpolate failed')
   end
-
-  private
 
   def self.wait_for_task_to_finish(deployment_name)
     `bosh -d #{deployment_name} task > /dev/null 2>&1`
   end
 
   def self.dev_release_version(version_prefix)
-    version = "dev."
+    version = 'dev.'
     version << "#{version_prefix}." unless version_prefix.empty?
     version << Time.now.to_i.to_s
 
@@ -154,7 +193,7 @@ module UnitTestsUtils::Bosh
   def self.parse_json_from_create_release(raw_json)
     json = JSON.parse(raw_json)
 
-    raise Exception.new("Could not find 'Tables'. Maybe this is a request timeout.") if json['Tables'].nil?
+    raise BoshError, "Could not find 'Tables'. Maybe this is a request timeout." if json['Tables'].nil?
 
     metadata = json['Tables'].select { |table| table['Content'].empty? }.first['Rows'].first
     normalized_version = metadata['version'].gsub('.', '-')
@@ -169,20 +208,22 @@ module UnitTestsUtils::Bosh
 
   def self.execute_or_raise_error(command, msg)
     stdout, stderr, exit_status = Open3.capture3(command)
-    if !exit_status.nil? && exit_status.to_i > 0
-      raise BoshError.new("#{msg} - exit_status: #{exit_status}\nstdout: #{stdout}\nstderr: #{stderr}")
+    if !exit_status.nil? && exit_status.to_i.positive?
+      raise BoshError, "#{msg} - exit_status: #{exit_status}\nstdout: #{stdout}\nstderr: #{stderr}"
     end
-    return stdout
+
+    stdout
   end
 
   # execute_or_raise_error_in executes the command with stdin provided and
   # raises an error if the command is unsuccessful.
   def self.execute_or_raise_error_in(stdin, command, msg)
     stdout, stderr, exit_status = Open3.capture3(command, stdin_data: stdin)
-    if !exit_status.nil? && exit_status.to_i > 0
-      raise BoshError.new("#{msg} - exit_status: #{exit_status}\nstdout: #{stdout}\nstderr: #{stderr}")
+    if !exit_status.nil? && exit_status.to_i.positive?
+      raise BoshError, "#{msg} - exit_status: #{exit_status}\nstdout: #{stdout}\nstderr: #{stderr}"
     end
-    return stdout
+
+    stdout
   end
 
   class BoshError < StandardError; end

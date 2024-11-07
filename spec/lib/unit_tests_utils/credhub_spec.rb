@@ -2,8 +2,9 @@ require 'spec_helper'
 
 describe UnitTestsUtils::CredHub do
   describe '#get_by_name' do
+    subject(:get_by_name) { described_class.get_by_name(name) }
+
     let(:name) { 'anything' }
-    subject(:get_by_name) { UnitTestsUtils::CredHub.get_by_name(name) }
 
     it 'executes with the right command' do
       command_expected = "credhub get --name='#{name}' --output-json"

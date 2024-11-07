@@ -7,7 +7,6 @@ require 'socket'
 require 'timeout'
 
 class UnitTestsUtils::Turbulence
-
   # URL should be i.e. https://IP:PORT/api/v1/incidents
   def initialize(logger)
     @logger = logger
@@ -16,14 +15,14 @@ class UnitTestsUtils::Turbulence
     @url = "https://#{host}:#{port}/api/v1/incidents"
     @username = get_from_env('TURBULENCE_USER')
     @password = get_from_env('TURBULENCE_SECRET')
-    @locked_instances = Set.new()
+    @locked_instances = Set.new
   end
 
   # this will be called right before the GC cleans up an
   # object instance
-  def finalize()
+  def finalize
     # below function is not yet fully functional
-    unlock_all_instances()
+    unlock_all_instances
   end
 
   def get_vm_id(deployment, instance_jobname, instance_index)
@@ -35,7 +34,7 @@ class UnitTestsUtils::Turbulence
       bosh_ids_sorted[jobname] = bosh_ids_sorted[jobname] || []
       bosh_ids_sorted[jobname].push(guid)
     end
-    return bosh_ids_sorted[instance_jobname][instance_index.to_i]
+    bosh_ids_sorted[instance_jobname][instance_index.to_i]
   end
 
   # deployment_name: should be a string
@@ -44,20 +43,21 @@ class UnitTestsUtils::Turbulence
   def crash_vms_without_blocking(deployment_name, ids: [])
     # below function is not yet fully functional
     # lock_instances(ids)
-    body = { "Tasks" =>
-             [
-               { "Type" => "Shutdown", "Crash" => true }
-             ]
-           }
-    body["Selector"] = get_vms_selector(deployment_name, ids: ids)
-    return send_post_request(body)
+    body = {
+      'Tasks' =>
+                   [
+                     { 'Type' => 'Shutdown', 'Crash' => true }
+                   ]
+    }
+    body['Selector'] = get_vms_selector(deployment_name, ids: ids)
+    send_post_request(body)
   end
 
   def crash_vms(deployment, ids: [])
     lock_instances(deployment, ids: ids)
     incident_id = crash_vms_without_blocking(deployment, ids: ids)
     block_until_crashed(deployment, ids: ids)
-    return incident_id
+    incident_id
   end
 
   # Isolates the given VMs via IPtables, only SSH and Boshagent will still be
@@ -167,12 +167,15 @@ class UnitTestsUtils::Turbulence
   # getting the status of an incident
   def get_incident_status(id)
     raise NotImplementedError
-    response = HTTParty.get("#{url.to_str}/:#{id}", :headers => { 'Content-Type' => 'application/json' }, :basic_auth => auth, verify: false )
-    unless response.success?
-      raise "Request to turbulence(#{url.to_str}/:#{id}) failed"
-    end
-    response_body = JSON.parse(response.body)
-    return response_body
+    response = HTTParty.get(
+      "#{url.to_str}/:#{id}",
+      headers: { 'Content-Type' => 'application/json' },
+      basic_auth: auth,
+      verify: false
+    )
+    raise "Request to turbulence(#{url.to_str}/:#{id}) failed" unless response.success?
+
+    JSON.parse(response.body)
   end
 
   def start_vms(deployment, ids: [], port: nil)
@@ -189,47 +192,48 @@ class UnitTestsUtils::Turbulence
   def send_post_request(body)
     response = HTTParty.post(
       url.to_str,
-      :body => body.to_json,
-      :headers => { 'Content-Type' => 'application/json' },
-      :basic_auth => auth,
+      body: body.to_json,
+      headers: { 'Content-Type' => 'application/json' },
+      basic_auth: auth,
       verify: false
     )
 
     logger.debug(
-      "POST Request to Turbulence: \n" +
-      "\tURL: #{url.to_str}\n" +
-      "\tAUTH: #{auth}\n" +
+      "POST Request to Turbulence: \n" \
+      "\tURL: #{url.to_str}\n" \
+      "\tAUTH: #{auth}\n" \
       "\tBODY: #{body.to_json}"
     )
 
     unless response.success?
-      raise "Request to turbulence(#{url.to_str}) failed, \n" +
-        "\tauth: #{auth.inspect}, \n" +
-        "\tBody: #{body}, \n" +
-        "\tResponse: #{response.body}"
+      raise "Request to turbulence(#{url.to_str}) failed, \n" \
+            "\tauth: #{auth.inspect}, \n" \
+            "\tBody: #{body}, \n" \
+            "\tResponse: #{response.body}"
     end
     response_body = JSON.parse(response.body)
-    return response_body["ID"]
+    response_body['ID']
   end
 
   # deployment_name: should be a string
   # ids: an array of vm guid's
   def get_vms_selector(deployment_name, ids: [])
     {
-      "Deployment" => {
-                        "Name" => deployment_name,
-                        "Limit" => "100%"
-                      },
-      "ID" => { "Values" => ids }
+      'Deployment' => {
+        'Name' => deployment_name,
+        'Limit' => '100%'
+      },
+      'ID' => { 'Values' => ids }
     }
   end
 
   def auth
-    {:username => "#{username}", :password => "#{password}"}
+    { username: username.to_s, password: password.to_s }
   end
 
   def get_from_env(name)
     raise "ENV variable '#{name}' required!" unless ENV[name]
+
     ENV[name]
   end
 
@@ -250,7 +254,7 @@ class UnitTestsUtils::Turbulence
         wanted_ip_addresses.push(current_ip_address) if ids.include? current_id
       end
     end
-    return wanted_ip_addresses
+    wanted_ip_addresses
   end
 
   def lock_instances(deployment, ids: [])
@@ -263,13 +267,13 @@ class UnitTestsUtils::Turbulence
   end
 
   def unlock_instances(deployment, ids: [])
-    @logger.debug("unignoring instances")
+    @logger.debug('unignoring instances')
     ids = fix_ids_for_bosh(deployment, ids: ids)
-    @logger.debug("#{ids.inspect}")
+    @logger.debug(ids.inspect.to_s)
     ids.each do |id|
       @logger.debug("bosh unignore -d #{deployment} #{id}")
       result = `bosh unignore -d '#{deployment}' '#{id}'`
-      @logger.debug("#{result.inspect}")
+      @logger.debug(result.inspect.to_s)
       @locked_instances.delete([deployment, id])
     end
   end
@@ -279,7 +283,7 @@ class UnitTestsUtils::Turbulence
     block_until_recreated(deployment, ids: ids, port: port)
   end
 
-  def unlock_all_instances()
+  def unlock_all_instances
     @locked_instances.each do |deployment, id|
       `bosh unignore -d '#{deployment}' '#{id}'`
     end
@@ -292,7 +296,7 @@ class UnitTestsUtils::Turbulence
     bosh_vms.split("\n").each do |line|
       bosh_ids.push(line.split("\t")[0].strip)
     end
-    return bosh_ids
+    bosh_ids
   end
 
   # This transforms IDs suitable for Turbulence into the format BOSH understands
@@ -308,18 +312,18 @@ class UnitTestsUtils::Turbulence
       fixed_ids = bosh_ids
     else
       bosh_ids.each do |id|
-        search_term = id.split("/")[1].strip
+        search_term = id.split('/')[1].strip
         fixed_ids.push(id) if ids.find { |e| search_term == e }
       end
     end
-    return fixed_ids
+    fixed_ids
   end
 
   def block_until_crashed(deployment, ids: [])
     addresses = get_ips_for_deployment(deployment, ids: ids)
     pings_successful = true
     loopcounter = 0
-    while pings_successful do
+    while pings_successful
       sleep 5
       ping_statuses = []
       addresses.each do |ip|
@@ -337,7 +341,7 @@ class UnitTestsUtils::Turbulence
     addresses = get_ips_for_deployment(deployment, ids: ids)
     pings_successful = false
     loopcounter = 0
-    until pings_successful do
+    until pings_successful
       sleep 5
       ping_statuses = []
       addresses.each do |ip|
@@ -354,7 +358,7 @@ class UnitTestsUtils::Turbulence
     ports_open = false
     ports_open = true if port.nil?
     loopcounter = 0
-    until ports_open do
+    until ports_open
       sleep 5
       port_statuses = []
       addresses.each do |ip|
@@ -372,19 +376,16 @@ class UnitTestsUtils::Turbulence
 
   def is_port_open?(ip, port)
     begin
-      Timeout::timeout(1) do
-        begin
-          s = TCPSocket.new(ip, port)
-          s.close
-          return true
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
-          return false
-        end
+      Timeout.timeout(1) do
+        s = TCPSocket.new(ip, port)
+        s.close
+        return true
+      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+        return false
       end
     rescue Timeout::Error
     end
 
-    return false
+    false
   end
-
 end
