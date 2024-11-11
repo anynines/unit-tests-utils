@@ -4,8 +4,18 @@ require 'securerandom'
 class UnitTestsUtils::PostgreSQLClient
   attr_reader :args
 
-  POSTGRESQL_PROPERTIES_PATH = '/instance_groups/name=pg/jobs/name=postgresql-ha/properties'
+  POSTGRESQL_PROPERTIES_PATH = '/instance_groups/name=pg/jobs/name=postgresql-ha/properties'.freeze
   TEST_TABLE = 'a9s_pg_tests'.freeze
+
+  def self.create_from_manifest(manifest, args = {})
+    args[:host] ||= manifest.hostname
+    args[:user] ||= manifest.properties['postgresql-ha']['admin_credentials']['username']
+    args[:password] ||= manifest.properties['postgresql-ha']['admin_credentials']['password']
+
+    args[:sslmode] = 'require' if manifest.properties("#{POSTGRESQL_PROPERTIES_PATH}/postgresql-ha/ssl?/enable")
+
+    new(args)
+  end
 
   def initialize(args)
     @args = args
@@ -13,22 +23,10 @@ class UnitTestsUtils::PostgreSQLClient
     @args[:sslmode] ||= 'disable'
   end
 
-  def self.create_from_manifest(manifest, args = {})
-    args[:host] ||= manifest.hostname
-    args[:user] ||= manifest.properties['postgresql-ha']['admin_credentials']['username']
-    args[:password] ||= manifest.properties['postgresql-ha']['admin_credentials']['password']
-
-    if manifest.properties("#{POSTGRESQL_PROPERTIES_PATH}/postgresql-ha/ssl?/enable")
-      args[:sslmode] = "require"
-    end
-
-    self.new(args)
-  end
-
   def ping(extra_args = {})
     ping_args = args.merge(extra_args)
     logger.debug("* Creating ping with args: *#{ping_args}*")
-    return PG::Connection.ping(ping_args)
+    PG::Connection.ping(ping_args)
   end
 
   def drop_table
@@ -36,12 +34,14 @@ class UnitTestsUtils::PostgreSQLClient
   end
 
   def create_table
-    execute("CREATE TABLE IF NOT EXISTS #{TEST_TABLE} (test_key TEXT PRIMARY KEY NOT NULL, " \
-            "test_value TEXT NOT NULL)")
+    execute(
+      "CREATE TABLE IF NOT EXISTS #{TEST_TABLE} (test_key TEXT PRIMARY KEY NOT NULL, " \
+                  'test_value TEXT NOT NULL)'
+    )
   end
 
   def generate_data
-    {'test_key' => "#{SecureRandom.uuid}", 'test_value' => "#{SecureRandom.uuid}"}
+    { 'test_key' => SecureRandom.uuid.to_s, 'test_value' => SecureRandom.uuid.to_s }
   end
 
   def insert(data)
@@ -79,13 +79,13 @@ class UnitTestsUtils::PostgreSQLClient
   def connect(extra_args = {})
     connect_args = args.merge(extra_args)
     logger.debug("* Creating connection with args: *#{connect_args}*")
-    return PG::Connection.new(connect_args)
+    PG::Connection.new(connect_args)
   end
 
   def execute(sql, args = {})
     conn = connect(args)
-    return conn.exec(sql)
+    conn.exec(sql)
   ensure
-    conn.close if !conn.nil?
+    conn&.close
   end
 end

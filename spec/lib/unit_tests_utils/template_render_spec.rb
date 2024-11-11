@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'yaml'
 
 describe UnitTestsUtils::TemplateRender do
+  subject { described_class.new(template) }
+
   let(:template) { 'spec/fixtures/template-with-vars.yml' }
   let(:output_file) { '/tmp/template-with-vars.yml' }
   let(:vars) do
@@ -11,10 +13,8 @@ describe UnitTestsUtils::TemplateRender do
     }
   end
 
-  subject { UnitTestsUtils::TemplateRender.new(template) }
-
   it 'renders the template in an output file' do
-    result = subject.save(output_file, vars)
+    subject.save(output_file, vars)
     manifest = YAML.load_file(output_file)
 
     expect(manifest['first_level']['first_entry']).to eq(vars[:first_var_content])

@@ -4,7 +4,7 @@ require_relative '../../../lib/unit_tests_utils'
 describe UnitTestsUtils::RspecLogger do
   context 'when buffering' do
     subject(:logger) do
-      UnitTestsUtils::RspecLogger.new.tap do |i|
+      described_class.new.tap do |i|
         i.io_output = StringIO.new
       end
     end
@@ -16,7 +16,7 @@ describe UnitTestsUtils::RspecLogger do
 
     describe 'buffer' do
       it 'buffers messages' do
-        expect(logger.buffer.length).to eql(2)
+        expect(logger.buffer.length).to be(2)
       end
     end
 
@@ -24,12 +24,12 @@ describe UnitTestsUtils::RspecLogger do
       it 'clears the buffer' do
         logger.clear
 
-        expect(logger.buffer.length).to eql(0)
+        expect(logger.buffer.length).to be(0)
       end
     end
 
     describe '#print' do
-      it "outputs all messages" do
+      it 'outputs all messages' do
         logger.print
 
         logger.io_output.rewind

@@ -1,16 +1,14 @@
 module UnitTestsUtils::InternalDNS
   # <b>DEPRECATED:</b> Please use <tt>resolve_domain_name</tt> instead.
   def self.resolv(hostname)
-    warn "[DEPRECATION] `resolv` is deprecated. Please use `resolve_domain_name` instead."
+    warn '[DEPRECATION] `resolv` is deprecated. Please use `resolve_domain_name` instead.'
     resolve_domain_name(hostname).first
   end
 
   def self.resolve_domain_name(hostname)
-    if self.valid_ips?([hostname])
-      return [hostname]
-    end
+    return [hostname] if valid_ips?([hostname])
 
-    return `dig +short #{hostname} @#{nameserver_ip}`.strip.split("\n")
+    `dig +short #{hostname} @#{nameserver_ip}`.strip.split("\n")
   end
 
   def self.host_addresses(hostnames, port)

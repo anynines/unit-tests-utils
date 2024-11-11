@@ -8,26 +8,26 @@ class UnitTestsUtils::Manifest
   attr_reader :path, :manifest, :additional_vars
 
   def self.create(name, manifest_path, additional_vars = {}, ignore_existing = false)
-    raise ArgumentError, "Manifest for name #{name} already exists" if !ignore_existing && @@instances.has_key?(name)
+    raise ArgumentError, "Manifest for name #{name} already exists" if !ignore_existing && @@instances.key?(name)
 
-    @@instances[name] = self.new(manifest_path, additional_vars)
+    @@instances[name] = new(manifest_path, additional_vars)
   end
 
   def self.fetch(name)
-    raise ArgumentError, "Manifest for name #{name} does not exist" unless @@instances.has_key?(name)
+    raise ArgumentError, "Manifest for name #{name} does not exist" unless @@instances.key?(name)
 
     @@instances[name]
   end
 
   def self.create_from_env(manifest_prefix, additional_vars = {})
-    manifest_prefix_length= manifest_prefix.length
+    manifest_prefix_length = manifest_prefix.length
 
     ENV.each_key do |name|
-      if name.start_with?(manifest_prefix)
-        manifest_name = name[manifest_prefix_length..-1].to_sym
+      next unless name.start_with?(manifest_prefix)
 
-        self.create(manifest_name, ENV[name], additional_vars)
-      end
+      manifest_name = name[manifest_prefix_length..].to_sym
+
+      create(manifest_name, ENV[name], additional_vars)
     end
   end
 
@@ -35,7 +35,7 @@ class UnitTestsUtils::Manifest
     @path = manifest_path
     interpolated_manifest = UnitTestsUtils::Bosh.interpolate(manifest_path, additional_vars, false, ops_files)
     @manifest = YAML.load(interpolated_manifest)
-    @additional_vars = Hash[additional_vars.map { |key, value| [key.to_sym, value] }]
+    @additional_vars = additional_vars.transform_keys(&:to_sym)
   end
 
   def name
@@ -43,7 +43,7 @@ class UnitTestsUtils::Manifest
       additional_vars_key = manifest['name'][/^\(\((.*)\)\)$/, 1]
       additional_vars_key = additional_vars_key.to_sym if additional_vars_key
 
-      if additional_vars_key && additional_vars.has_key?(additional_vars_key)
+      if additional_vars_key && additional_vars.key?(additional_vars_key)
         additional_vars[additional_vars_key]
       else
         manifest['name']
@@ -60,7 +60,7 @@ class UnitTestsUtils::Manifest
   end
 
   def hostname(instance_name = nil, index = '0')
-    instance_name = instance_names.first unless instance_name
+    instance_name ||= instance_names.first
     key = "#{instance_name}/#{index}"
 
     hostnames[key]
@@ -72,7 +72,8 @@ class UnitTestsUtils::Manifest
 
       instance_names.each do |instance_name|
         instance_count(instance_name).times do |index|
-          hostnames["#{instance_name}/#{index}"] = "#{name}-#{instance_name}-#{index}.node.#{properties['consul']['dc']}.#{properties['consul']['domain']}"
+          hostnames["#{instance_name}/#{index}"] =
+            "#{name}-#{instance_name}-#{index}.node.#{properties['consul']['dc']}.#{properties['consul']['domain']}"
         end
       end
 
@@ -85,14 +86,14 @@ class UnitTestsUtils::Manifest
       UnitTestsUtils::Manifest::Traversal.new(manifest).find(path)
     else
       {}.tap do |merged_properties|
-        instance_groups = manifest.dig('instance_groups')
+        instance_groups = manifest['instance_groups']
         instance_groups.each do |instance|
-          instance.each do |key,value|
-            if key == "jobs"
-              value.each do |job|
-                property = job.dig('properties')
-                deep_merge!(merged_properties, (property || {}))
-              end
+          instance.each do |key, value|
+            next unless key == 'jobs'
+
+            value.each do |job|
+              property = job['properties']
+              deep_merge!(merged_properties, (property || {}))
             end
           end
         end
@@ -111,10 +112,9 @@ class UnitTestsUtils::Manifest
   # section of the instance group.
   def get_network(instance_name)
     network = instance_group(instance_name)['properties']['network']
-    if instance_group(instance_name)['networks'].any? { |n| n['name'] == network }
-      return network
-    end
-    raise "properties.network was not found in networks"
+    return network if instance_group(instance_name)['networks'].any? { |n| n['name'] == network }
+
+    raise 'properties.network was not found in networks'
   end
 
   # set_network changes the network in the internal representation of the
@@ -124,7 +124,7 @@ class UnitTestsUtils::Manifest
     ig = instance_group(instance_name)
     ig['networks'].delete_if { |n| n['name'] == old_network }
     ig['properties']['network'] = new_network
-    ig['networks'].push( { "name" => new_network }  )
+    ig['networks'].push({ 'name' => new_network })
   end
 
   def instance_group(instance_name)

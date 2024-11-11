@@ -13,9 +13,10 @@ module UnitTestsUtils::Consul
 
     http_code = `curl -s -S -w %{http_code} -o /dev/null --connect-timeout 15 -X PUT -d '#{payload}' #{consul_endpoint}`
 
-    if "#{http_code}" != "200"
-      raise ("could not deregister master alias: #{http_code} payload: #{payload}, endpoint: #{consul_endpoint}")
+    if http_code.to_s != '200'
+      raise("could not deregister master alias: #{http_code} payload: #{payload}, endpoint: #{consul_endpoint}")
     end
-    return true
+
+    true
   end
 end

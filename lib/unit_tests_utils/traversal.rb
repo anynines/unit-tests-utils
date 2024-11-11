@@ -16,7 +16,7 @@ class UnitTestsUtils::Manifest::Traversal
     first = formatted_key(raw_first)
     rest = rest.join('/')
 
-    if rest == ""
+    if rest == ''
       if first.include?('=')
         components = first.split('=')
         found = manifest.find { |pair| pair[components.first] == components.last }
@@ -31,13 +31,9 @@ class UnitTestsUtils::Manifest::Traversal
       return traverse(found, rest)
     end
 
-    if manifest.is_a?(Hash)
-      if manifest.key?(first)
-        return traverse(manifest[first], rest)
-      end
-    end
+    return traverse(manifest[first], rest) if manifest.is_a?(Hash) && manifest.key?(first)
 
-    raise NotImplementedError if !is_optional(raw_first)
+    raise NotImplementedError unless is_optional(raw_first)
   end
 
   private

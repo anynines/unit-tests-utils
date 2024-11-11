@@ -1,14 +1,12 @@
 class UnitTestsUtils::RspecLogger
-
   attr_reader :buffer
   attr_accessor :io_output
 
   def initialize
     @io_output = $stdout
     @buffer = []
-    @live_log = !ENV['UNIT_TEST_DEBUG'].nil? && ENV['UNIT_TEST_DEBUG'] == "true"
+    @live_log = !ENV['UNIT_TEST_DEBUG'].nil? && ENV['UNIT_TEST_DEBUG'] == 'true'
   end
-
 
   def debug(message)
     method = caller_locations.first
@@ -29,7 +27,7 @@ class UnitTestsUtils::RspecLogger
 
   def append(message)
     if live_log
-      io_output.puts "#{(object_id << 1)} - #{message}"
+      io_output.puts "#{object_id << 1} - #{message}"
     else
       buffer.push(message)
     end

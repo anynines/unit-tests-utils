@@ -1,14 +1,15 @@
 require 'spec_helper'
 
 describe UnitTestsUtils::PGWebServiceClient do
-  describe "#initialize" do
+  describe '#initialize' do
+    subject(:pg_web_service_client) { described_class.new(manifest, pg_web_service_options) }
+
     let(:manifest_id) { 'manifest_id' }
     let(:manifest) do
       manifest_mocked = double('')
       allow(manifest_mocked).to receive(:name).and_return(manifest_id)
       manifest_mocked
     end
-    subject(:pg_web_service_client) { UnitTestsUtils::PGWebServiceClient.new(manifest, pg_web_service_options) }
 
     context 'when there are not options' do
       let(:pg_web_service_options) { {} }
