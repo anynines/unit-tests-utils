@@ -167,6 +167,49 @@ module UnitTestsUtils::Bosh
     end
   end
 
+  # Marks a BOSH instance as ignored so that subsequent `bosh deploy` runs skip
+  # it (no updates, recreates, or lifecycle actions are applied to that VM).
+  # This is typically used to exercise partial-deployment / CPI migration
+  # scenarios in tests, where only a subset of the instances should be touched
+  # by the next deploy.
+  #
+  # See: https://bosh.io/docs/cli-v2/#ignore
+  #
+  # @param deployment_name [String] name of the target BOSH deployment.
+  # @param instance_name   [String] instance group name (e.g. "pg").
+  # @param instance_id     [String, Integer] instance identifier accepted by the
+  #   BOSH CLI — either the numeric index (e.g. "0") or the instance UUID.
+  #   It is interpolated as `#{instance_name}/#{instance_id}`.
+  # @raise [BoshError] if the underlying `bosh ignore` command exits non-zero.
+  # @return [String] stdout of the `bosh ignore` command.
+  def self.ignore_instance(deployment_name, instance_name, instance_id)
+    execute_or_raise_error(
+      "bosh --non-interactive -d #{deployment_name} ignore #{instance_name}/#{instance_id}",
+      "Failed to ignore instance #{instance_name}/#{instance_id}"
+    )
+  end
+
+  # Clears the "ignored" flag previously set with {ignore_instance}, allowing
+  # subsequent `bosh deploy` runs to once again update / recreate the instance.
+  # Tests that ignore instances should always pair the call with an unignore
+  # (typically in an `after` hook) to leave the deployment in a clean state.
+  #
+  # See: https://bosh.io/docs/cli-v2/#unignore
+  #
+  # @param deployment_name [String] name of the target BOSH deployment.
+  # @param instance_name   [String] instance group name (e.g. "pg").
+  # @param instance_id     [String, Integer] instance identifier accepted by the
+  #   BOSH CLI — either the numeric index (e.g. "0") or the instance UUID.
+  #   It is interpolated as `#{instance_name}/#{instance_id}`.
+  # @raise [BoshError] if the underlying `bosh unignore` command exits non-zero.
+  # @return [String] stdout of the `bosh unignore` command.
+  def self.unignore_instance(deployment_name, instance_name, instance_id)
+    execute_or_raise_error(
+      "bosh --non-interactive -d #{deployment_name} unignore #{instance_name}/#{instance_id}",
+      "Failed to unignore instance #{instance_name}/#{instance_id}"
+    )
+  end
+
   def self.interpolate(manifest_path, additional_vars = [], vars_errs = false, ops_files = [])
     vars = "-l #{ENV['PATH_TO_IAAS_CONFIG']}"
     vars << " -l #{ENV['PATH_TO_CREDS']}" if ENV['PATH_TO_CREDS']
